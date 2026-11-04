@@ -1,0 +1,5 @@
+build/
+.DS_Store
+*.zip
+# a local draft, not part of the app
+docs/reddit-post.md
