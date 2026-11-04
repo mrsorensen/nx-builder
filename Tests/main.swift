@@ -120,6 +120,30 @@ for language in AppLanguage.allCases where language != .system && language != .e
     if !table.isEmpty { check(table.count > 200, "\(language.rawValue): \(table.count) translations load") }
 }
 
+// The installer.
+let mac = OnboardingStatus.detect(repo: repo, python: repoPython, keys: "")
+print("     this Mac: xcode \(mac.xcodeApp ?? "-") ready=\(mac.xcodeReady) brew=\(mac.brew ?? "-") missing=\(mac.missingFormulas) dotnet10=\(mac.dotnet10) metal=\(mac.metal) repo=\(mac.repo) python=\(mac.python)")
+check(mac.toolsReady, "this Mac needs nothing installed")
+let homebrewSpctl = "Homebrew.pkg: accepted\nsource=Notarized Developer ID\norigin=Developer ID Installer: Patrick Linnane (927JGANW46)\n"
+let dotnetSpctl = "dotnet.pkg: accepted\nsource=Notarized Developer ID\norigin=Developer ID Installer: Microsoft Corporation (UBF8T346G9)\n"
+check(Onboarding.trusted(assessment: homebrewSpctl, signer: "Homebrew") && Onboarding.trusted(assessment: dotnetSpctl, signer: "Microsoft"), "Homebrew's and Microsoft's installers are trusted")
+check(!Onboarding.trusted(assessment: dotnetSpctl, signer: "Homebrew"), "a package from another team is refused")
+check(!Onboarding.trusted(assessment: homebrewSpctl.replacingOccurrences(of: "Notarized Developer ID", with: "Developer ID"), signer: "Homebrew"), "a package that is not notarized is refused")
+check(!Onboarding.trusted(assessment: "", signer: "Homebrew"), "a package Gatekeeper rejects is refused")
+let script = Onboarding.adminScript(["/usr/sbin/installer -pkg " + Onboarding.shellQuote("/tmp/it's \"odd\"/x.pkg") + " -target /", "/usr/bin/true"],
+                                    prompt: "NX Builder needs \"your\" password.")
+let compiled = Shell.run("/usr/bin/osacompile", ["-e", script, "-o", NSTemporaryDirectory() + "nxb-admin.scpt"], timeout: 30)
+check(compiled.ok, "the administrator script compiles: \(compiled.trimmed)")
+try? FileManager.default.removeItem(atPath: NSTemporaryDirectory() + "nxb-admin.scpt")
+func json(_ url: String) -> [String: Any] {
+    let r = Shell.run("/usr/bin/curl", ["-fsSL", "-H", "User-Agent: NX-Builder-tests", url], timeout: 60)
+    return (try? JSONSerialization.jsonObject(with: Data(r.output.utf8)) as? [String: Any]) ?? [:]
+}
+let brewPkg = Onboarding.homebrewPackage(in: json(Onboarding.homebrewRelease))
+check(brewPkg?.0.hasSuffix(".pkg") == true && (brewPkg?.1 ?? 0) > 10_000_000, "Homebrew's installer on GitHub: \(brewPkg?.0 ?? "none")")
+let dotnetPkg = Onboarding.dotnetPackage(in: json(Onboarding.dotnetReleases))
+check(dotnetPkg?.0.hasSuffix("osx-arm64.pkg") == true && dotnetPkg?.1.count == 128, ".NET 10 SDK installer from Microsoft: \(dotnetPkg?.0 ?? "none")")
+
 // Review fixes.
 let multi = report(["game profile: 010049900F546000", "app name: Super Mario 3D All-Stars; version: 1.1.0; bundle ID: x; app: /x/Mario.app",
                     "==== program 1", "game profile: 010049900F546001"])

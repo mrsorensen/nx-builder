@@ -25,10 +25,11 @@ following the Mac's language ([norsk README](README.nb.md)).
 
 - **Builds a game in one click.** It runs nxnative's own build script (`build_ipa_from_nsp.py --platform mac-app`)
   and shows each step, a progress bar, the time left and the log as it happens. The Mac stays awake while it works.
-- **Sets up a new Mac.** The Setup page checks everything a build needs (Xcode, the Metal toolchain, Homebrew tools,
-  .NET 10, nxnative, Python and its packages, your keys) and fixes what it can with one click: it downloads
-  nxnative, makes a Python environment of its own, and installs the Metal toolchain. For the rest it shows the exact
-  command to copy into Terminal.
+- **Sets up a new Mac for you.** On first start a welcome window lists what the Mac still needs and installs it with
+  one click: Homebrew and the .NET 10 SDK from their signed and notarized installers (checked before they run), zstd,
+  glslang and uv, Xcode's Metal toolchain, nxnative itself and a Python environment of its own. The Mac's password is
+  asked once. Xcode comes from the App Store with your Apple ID: NX Builder opens its page, waits, and sets Xcode up
+  when it is there. No Terminal needed.
 - **Knows the recipes.** nxnative has a setup, a *recipe* (game profile), for each game it supports, made for one
   exact game version. NX Builder lists every game with a recipe and the version it needs. It also warns before and
   during a build when your files are another version, which is the most common reason a game misbehaves.
@@ -67,14 +68,10 @@ cd nx-builder
 
 ## Use
 
-1. **Setup.** On a new Mac, NX Builder opens on Setup. Fix every red line, top to bottom:
-   - *Xcode*: install it from the App Store and open it once.
-   - *Metal toolchain*: click **Install the Metal toolchain** (a large download).
-   - *Command-line tools* and *.NET 10*: install [Homebrew](https://brew.sh), then copy the shown `brew` commands into Terminal.
-   - *nxnative*: click **Download nxnative …**, or choose the folder you already cloned it into.
-   - *Python packages*: click **Set up Python**. NX Builder makes its own environment with uv
-     (`brew install uv` if you have no Python 3.12 or later).
-   - *prod.keys*: choose the file dumped from your Switch.
+1. **Set up.** On a new Mac, NX Builder opens a welcome window. Click **Install**, enter your Mac's password when
+   macOS asks, and install Xcode in the App Store when it opens (it is free but large). NX Builder carries on by
+   itself, and asks you to choose the `prod.keys` dumped from your Switch at the end. Everything it installs is also
+   listed, with a button or a command for each, on the **Setup** page.
 2. **Build a game.** Choose the game file or its folder (or drop it on the window). The base game and its update go
    in the same folder. Check that the recipe line says the version fits, then click **Build the game**.
    A first build takes from a few minutes to about an hour. Later builds of the same game reuse most of the work.
@@ -109,7 +106,7 @@ Xbox, PlayStation, Switch Pro and 8BitDo controllers work as soon as they are co
 | “Wrong version for the recipe” | Your files are not the version nxnative made the game's fixes for. Dump that update from your Switch, put it in the game's folder and build again. |
 | “Build with this Mac's Metal compiler?” | Your Xcode is not the one nxnative tested its shaders with. Build anyway (untested, glitches are possible), or install the tested Xcode beside yours. |
 | “No recipe for this game” | nxnative does not support that game yet. The build guesses a setup, and the app may not start. |
-| A red line in Setup | Each one has a button, a command to copy, or a link. Fix them top to bottom, then **Check again**. |
+| A red line in Setup | Click **Install everything …** at the top of Setup, or fix each line with its button, command or link, then **Check again**. |
 | An nxnative update stops | Files changed in your nxnative folder (often `pyproject.toml` from the AppleGamingWiki guide) block it. NX Builder's own Python environment does not need that change. |
 | Not enough disk space | Delete old build folders from **My games** (right-click a game). |
 

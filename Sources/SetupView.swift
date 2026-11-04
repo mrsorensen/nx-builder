@@ -16,9 +16,16 @@ struct SetupView: View {
         Form {
             if checker.hasChecked && checker.failures > 0 {
                 Section {
-                    Label(L("%@ thing(s) to fix before you can build. Each has a button or a command to copy into Terminal.", "\(checker.failures)"),
-                          systemImage: "wrench.and.screwdriver")
-                        .foregroundStyle(.orange)
+                    HStack {
+                        Label(L("%@ thing(s) to fix before you can build.", "\(checker.failures)"), systemImage: "wrench.and.screwdriver")
+                            .foregroundStyle(.orange)
+                        Spacer()
+                        Button(L("Install everything …")) { model.showOnboarding = true }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(tasks.isRunning || model.runner.isBusy)
+                    }
+                    Text(L("NX Builder can install it all for you, or you can fix each line below with its button or command."))
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
 

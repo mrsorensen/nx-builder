@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var selection: SidebarItem? = .build
 
     var body: some View {
+        @Bindable var model = model
         NavigationSplitView {
             List(selection: $selection) {
                 Label {
@@ -51,10 +52,11 @@ struct ContentView: View {
         .task {
             await model.recipes.reload(repo: model.settings.repoPath)
             await model.checker.run(settings: model.settings)
-            // A first start on a Mac that is not set up yet opens on Setup.
-            if !model.checker.allGood && model.settings.gamePath.isEmpty { selection = .setup }
+            // A Mac that is not set up yet gets the welcome window, which installs what is missing.
+            if !model.checker.allGood { model.showOnboarding = true }
             await model.library.refresh(known: model.settings.knownApps)
             await model.updates.check(repo: model.settings.repoPath)
         }
+        .sheet(isPresented: $model.showOnboarding) { OnboardingView() }
     }
 }

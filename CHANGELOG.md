@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+- A welcome window installs everything a build needs, without the Terminal: Homebrew and the .NET 10 SDK from their
+  signed installer packages (Gatekeeper-checked for notarization and the expected Apple developer team, and .NET
+  against Microsoft's SHA-512), zstd, glslang and uv, Xcode's Metal toolchain, nxnative and the Python environment.
+  The Mac's password is asked once, in macOS's own dialog. Xcode comes from the App Store: NX Builder opens its page,
+  waits for it, then selects it, accepts its licence and runs its first launch.
+- Setup has an **Install everything …** button whenever something is missing.
+
 ## 1.1.0
 
 - Six more languages: German, French, Spanish, Brazilian Portuguese, Japanese and Simplified Chinese. The app

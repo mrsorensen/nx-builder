@@ -142,4 +142,7 @@ final class AppModel {
     let recipes = RecipeStore()
     let tasks = TaskRunner()
     let updates = NxnativeUpdates()
+    let onboarding = Onboarding()
+    /// The welcome window that installs what is missing.
+    var showOnboarding = false
 }

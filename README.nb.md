@@ -16,8 +16,9 @@ Den fulle beskrivelsen står i [README.md](README.md) (engelsk).
 1. **Installer:** last ned zip-filen fra Releases, pakk den ut og flytt **NX Builder** til Programmer. Første gang
    nekter macOS å åpne den (den er ikke notarisert). Prøv å åpne den, gå så til **Systeminnstillinger ›
    Personvern og sikkerhet** og klikk **Åpne likevel**. Eller bygg den selv med `./build.sh --install`.
-2. **Oppsett:** fiks de røde linjene ovenfra og ned. Knappene laster ned nxnative, setter opp Python og installerer
-   Metal-verktøyene; resten har en kommando du kopierer inn i Terminal.
+2. **Oppsett:** første gang åpner NX Builder et velkomstvindu. Klikk **Installer**, skriv Mac-passordet når macOS
+   spør, og installer Xcode i App Store når den åpnes. NX Builder installerer resten selv (Homebrew, .NET 10,
+   verktøyene, Metal-verktøyene, nxnative og Python), og ber deg til slutt velge prod.keys. Ingen Terminal.
 3. **Bygg:** velg spillfilen eller mappen. Grunnspill og oppdatering skal i samme mappe, i versjonen spillets
    oppskrift er laget for (se listen over spill med oppskrift).
 4. **Spill:** første start tar noen minutter mens macOS viser «Verifiserer …». Senere starter tar sekunder.

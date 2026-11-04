@@ -4,6 +4,11 @@
 import AppKit
 import SwiftUI
 
+/// The welcome window without its .task, which would detect this Mac's real state.
+struct OnboardingPreview: View {
+    var body: some View { OnboardingView() }
+}
+
 let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "."
 let app = NSApplication.shared
 app.setActivationPolicy(.prohibited)   // no Dock icon, never active
@@ -50,3 +55,8 @@ await snapshot("setup", NavigationStack { SetupView() }, size: CGSize(width: 860
 await snapshot("build", NavigationStack { BuildView(showSetup: {}) }, size: CGSize(width: 860, height: 900), dark: dark)
 await snapshot("library", NavigationStack { LibraryView(showBuild: {}) }, size: CGSize(width: 860, height: 520), dark: dark)
 await snapshot("recipes", RecipeListView(), size: CGSize(width: 760, height: 560), dark: dark)
+// The welcome window on a Mac that has nothing yet, waiting for Xcode from the App Store.
+var fresh = OnboardingStatus()
+fresh.missingFormulas = ["zstd", "glslang", "uv"]
+model.onboarding.preview(fresh, active: .xcode, waitingForXcode: true)
+await snapshot("onboarding", OnboardingPreview(), size: CGSize(width: 660, height: 680), dark: dark)
