@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- Six more languages: German, French, Spanish, Brazilian Portuguese, Japanese and Simplified Chinese. The app
+  follows the Mac's language, or the one chosen in Setup.
+- The texts live in `Localizations/<code>.json`, one file per language, so anyone can add or correct a
+  translation; `Tools/check_localizations.py` checks a file against the app's texts.
+
 ## 1.0.0
 
 First public version.

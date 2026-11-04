@@ -30,6 +30,7 @@ for s in 16 32 128 256 512; do
   /usr/bin/sips -z "$d" "$d" build/icon_1024.png --out "build/AppIcon.iconset/icon_${s}x${s}@2x.png" >/dev/null
 done
 /usr/bin/iconutil -c icns build/AppIcon.iconset -o "${APP}/Contents/Resources/AppIcon.icns"
+/bin/cp -R Localizations "${APP}/Contents/Resources/Localizations"
 
 /bin/cat > "${APP}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -45,7 +46,7 @@ done
   <key>CFBundleVersion</key><string>${VERSION}</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
-  <key>CFBundleLocalizations</key><array><string>en</string><string>nb</string></array>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>nb</string><string>de</string><string>fr</string><string>es</string><string>pt-BR</string><string>ja</string><string>zh-Hans</string></array>
   <key>LSMinimumSystemVersion</key><string>15.0</string>
   <key>LSArchitecturePriority</key><array><string>arm64</string></array>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>

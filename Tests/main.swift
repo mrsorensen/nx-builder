@@ -1,5 +1,5 @@
 // Headless checks of NX Builder's logic, run by test.sh: no window opens.
-// With NXB_DRAW=<folder> it also draws the cards there as PNG files; -appLanguage english|norwegian picks the language.
+// With NXB_DRAW=<folder> it also draws the cards there as PNG files; -appLanguage en|nb|de|fr|es|pt-BR|ja|zh-Hans picks the language.
 import AppKit
 import SwiftUI
 
@@ -106,6 +106,19 @@ check(noRepo.items.contains { $0.id == "python" && $0.fixes.contains(.action(.se
 if case .success(let steps) = SetupSteps.python() {
     check(steps.count == 3 && steps.last?.exe == AppPaths.venvPython, "Python setup: \(steps.map { $0.exe.lastPathComponent + " " + $0.args.prefix(2).joined(separator: " ") })")
 } else { check(false, "Python setup has a plan") }
+
+// Languages.
+check(L10n.format("%@ of %@", ["1", "2"]) == "1 of 2", "format: plain placeholders")
+check(L10n.format("%2$@ – %1$@", ["a", "b"]) == "b – a", "format: positional placeholders")
+check(L10n.format("100%% %@", ["x"]) == "100% x" && L10n.format("100%", []) == "100%", "format: percent signs")
+check(AppLanguage.matching(["de-NO"]) == .de && AppLanguage.matching(["nb-NO"]) == .nb && AppLanguage.matching(["no"]) == .nb, "Mac language: German, Norwegian")
+check(AppLanguage.matching(["zh-Hant-TW", "ja-JP"]) == .ja && AppLanguage.matching(["zh-Hans-CN"]) == .zhHans, "Mac language: Chinese scripts")
+check(AppLanguage.matching(["pt-PT"]) == .ptBR && AppLanguage.matching(["sv-SE"]) == .en && AppLanguage.matching(["en-US", "nb"]) == .en, "Mac language: fallbacks")
+check(AppLanguage(stored: "norwegian") == .nb && AppLanguage(stored: "english") == .en && AppLanguage(stored: nil) == .system, "the first version's stored choice")
+for language in AppLanguage.allCases where language != .system && language != .en {
+    let table = L10n.load(language)
+    if !table.isEmpty { check(table.count > 200, "\(language.rawValue): \(table.count) translations load") }
+}
 
 // Review fixes.
 let multi = report(["game profile: 010049900F546000", "app name: Super Mario 3D All-Stars; version: 1.1.0; bundle ID: x; app: /x/Mario.app",

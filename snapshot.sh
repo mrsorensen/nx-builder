@@ -1,7 +1,7 @@
 #!/bin/bash
 # Draws NX Builder's pages into PNG files in the folder given (default build/snapshots) without opening a window.
 #   NXB_GAME=<game folder> picks the game the Build page shows; NXB_LIGHT=1 draws the light appearance;
-#   -appLanguage english|norwegian picks the language.
+#   -appLanguage en|nb|de|fr|es|pt-BR|ja|zh-Hans picks the language.
 set -euo pipefail
 cd "$(dirname "$0")"
 OUT="build/snapshots"

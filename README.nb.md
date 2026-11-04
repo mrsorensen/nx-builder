@@ -3,7 +3,8 @@
 **Bygg Switch-spillene du eier om til Mac-apper med [nxnative](https://github.com/seedds/nxnative), uten Terminal.**
 
 NX Builder er en liten, gratis Mac-app oppå nxnative. Du velger en spillfil, trykker **Bygg spillet**, og får en
-Mac-app av spillet du kan dobbeltklikke på. Appen er på norsk når Macen er på norsk, ellers på engelsk.
+Mac-app av spillet du kan dobbeltklikke på. Appen følger språket på Macen: norsk, engelsk, tysk, fransk, spansk,
+portugisisk (Brasil), japansk eller forenklet kinesisk.
 Den fulle beskrivelsen står i [README.md](README.md) (engelsk).
 
 > NX Builder inneholder ingen spill, nøkler eller annet fra Nintendo, og lenker ikke til noe slikt. Du trenger dumper

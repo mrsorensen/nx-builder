@@ -30,66 +30,63 @@ struct BuildView: View {
             ScrollViewReader { proxy in
                 Form {
                     Section {
-                        PathRow(title: tr("Game", "Spill"), path: settings.gamePath,
-                                placeholder: tr("Choose an XCI or NSP file, or its folder", "Velg en XCI- eller NSP-fil, eller mappen den ligger i"),
+                        PathRow(title: L("Game"), path: settings.gamePath,
+                                placeholder: L("Choose an XCI or NSP file, or its folder"),
                                 missing: !FileManager.default.fileExists(atPath: settings.gamePath)) {
                             if let path = FilePicker.game(startingAt: settings.gamePath) { choose(path) }
                         }
                         if !settings.gamePath.isEmpty { gameFiles }
                         if !files.isEmpty { RecipeHintRow(check: precheck, recipe: recipe) }
                     } header: {
-                        Text(tr("The game", "Spillet"))
+                        Text(L("The game"))
                     } footer: {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(tr("Tip: you can also drop a file or folder on the window. The base game and its update go in the same folder, from the same region, in the version the game's recipe was made for.",
-                                    "Tips: Du kan også dra en fil eller mappe inn i vinduet. Grunnspillet og oppdateringen må ligge i samme mappe, være samme region og den versjonen spillets oppskrift er laget for."))
+                            Text(L("Tip: you can also drop a file or folder on the window. The base game and its update go in the same folder, from the same region, in the version the game's recipe was made for."))
                                 .font(.caption).foregroundStyle(.secondary)
-                            Button(tr("Which games have a recipe, and which version they need …", "Se hvilke spill som har oppskrift, og hvilken versjon de trenger …")) { showRecipes = true }
+                            Button(L("Which games have a recipe, and which version they need …")) { showRecipes = true }
                                 .buttonStyle(.link).font(.caption)
                         }
                     }
                     .disabled(runner.isBusy)
 
-                    Section(tr("Settings", "Innstillinger")) {
+                    Section(L("Settings")) {
                         PathRow(title: "prod.keys", path: settings.keysPath,
-                                placeholder: tr("Choose the keys dumped from your Switch", "Velg nøkkelfilen fra din Switch"),
+                                placeholder: L("Choose the keys dumped from your Switch"),
                                 missing: !FileManager.default.fileExists(atPath: settings.keysPath)) {
-                            if let path = FilePicker.file(message: tr("Choose the prod.keys dumped from your own Switch.", "Velg prod.keys fra din egen Switch."), startingAt: settings.keysPath) {
+                            if let path = FilePicker.file(message: L("Choose the prod.keys dumped from your own Switch."), startingAt: settings.keysPath) {
                                 settings.keysPath = path
                             }
                         }
-                        SwiftUI.Picker(tr("Game language", "Språk i spillet"), selection: $settings.language) {
+                        SwiftUI.Picker(L("Game language"), selection: $settings.language) {
                             ForEach(gameLanguages) { Text($0.name).tag($0.code) }
                         }
-                        SwiftUI.Picker(tr("Save the app in", "Lagre appen i"), selection: $settings.destination) {
+                        SwiftUI.Picker(L("Save the app in"), selection: $settings.destination) {
                             ForEach(Destination.allCases) { Text($0.label).tag($0) }
                         }
                         if settings.destination == .custom {
-                            PathRow(title: tr("Folder", "Mappe"), path: settings.customDestPath, placeholder: tr("Choose a folder", "Velg en mappe")) {
-                                if let path = FilePicker.folder(message: tr("Where should the finished app go?", "Hvor skal den ferdige appen ligge?"), startingAt: settings.customDestPath) {
+                            PathRow(title: L("Folder"), path: settings.customDestPath, placeholder: L("Choose a folder")) {
+                                if let path = FilePicker.folder(message: L("Where should the finished app go?"), startingAt: settings.customDestPath) {
                                     settings.customDestPath = path
                                 }
                             }
                         }
                         if fastBuildAvailable {
                             Toggle(isOn: $settings.seenShaders) {
-                                Text(tr("Fast build", "Raskt bygg"))
-                                Text(tr("Builds only the shaders nxnative's playtests used: minutes instead of hours, but untested places may lack graphics.",
-                                        "Bygger bare shaderne fra nxnatives testspilling: minutter i stedet for timer, men steder som ikke er testet, kan mangle grafikk."))
+                                Text(L("Fast build"))
+                                Text(L("Builds only the shaders nxnative's playtests used: minutes instead of hours, but untested places may lack graphics."))
                             }
                         }
                         if model.checker.metalMismatch || settings.allowOtherMetal {
                             Toggle(isOn: $settings.allowOtherMetal) {
-                                Text(tr("Build with this Mac's Metal compiler", "Bygg med denne Macens Metal-kompilator"))
-                                Text(tr("Your Xcode is not the one nxnative was tested with. Without this, games that use NVN stop before their shaders. Untested: graphics glitches are possible.",
-                                        "Xcode-versjonen din er ikke den nxnative er testet med. Uten denne stopper bygget av spill som bruker NVN. Ikke testet: grafikkfeil kan forekomme."))
+                                Text(L("Build with this Mac's Metal compiler"))
+                                Text(L("Your Xcode is not the one nxnative was tested with. Without this, games that use NVN stop before their shaders. Untested: graphics glitches are possible."))
                             }
                         }
                     }
                     .disabled(runner.isBusy)
 
                     if runner.state != .idle {
-                        Section(tr("Progress", "Fremdrift")) {
+                        Section(L("Progress")) {
                             ProgressPanel(runner: runner)
                         }
                         .id("progress")
@@ -109,7 +106,7 @@ struct BuildView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
         }
-        .navigationTitle(tr("Build a game", "Bygg et spill"))
+        .navigationTitle(L("Build a game"))
         .overlay {
             if dropTargeted {
                 RoundedRectangle(cornerRadius: 12)
@@ -127,33 +124,31 @@ struct BuildView: View {
         .onChange(of: runner.state) { refreshFiles() }
         .sheet(isPresented: $showRecipes) { RecipeListView() }
         .sheet(isPresented: $showControls) { ControlsSheet() }
-        .alert(tr("Put the game in a folder of its own?", "Legge spillet i en egen mappe?"),
+        .alert(L("Put the game in a folder of its own?"),
                isPresented: Binding(get: { looseFile != nil }, set: { if !$0 { looseFile = nil } })) {
-            Button(tr("Move to its own folder", "Flytt til egen mappe")) { moveLooseFile() }
-            Button(tr("Use the folder it is in", "Bruk mappen den ligger i")) {
+            Button(L("Move to its own folder")) { moveLooseFile() }
+            Button(L("Use the folder it is in")) {
                 if let file = looseFile { settings.gamePath = file.deletingLastPathComponent }
                 looseFile = nil
             }
-            Button(tr("Cancel", "Avbryt"), role: .cancel) { looseFile = nil }
+            Button(L("Cancel"), role: .cancel) { looseFile = nil }
         } message: {
             if let file = looseFile {
                 let url = URL(fileURLWithPath: file)
                 let folder = GameFile.folderName(for: url), parent = file.deletingLastPathComponent.tildePath
-                Text(tr("nxnative builds from one folder per game and puts a build folder of several GB beside the game files. “\(url.lastPathComponent)” moves to a new folder, “\(folder)”, in \(parent). Put the update and any DLC in that folder too.",
-                        "nxnative bygger fra én mappe per spill og lager en byggemappe på flere GB ved siden av spillfilene. «\(url.lastPathComponent)» flyttes til en ny mappe, «\(folder)», i \(parent). Legg oppdateringen og eventuell DLC i den samme mappen."))
+                Text(L("nxnative builds from one folder per game and puts a build folder of several GB beside the game files. “%@” moves to a new folder, “%@”, in %@. Put the update and any DLC in that folder too.", "\(url.lastPathComponent)", "\(folder)", "\(parent)"))
             }
         }
-        .alert(tr("Build with this Mac's Metal compiler?", "Bygge med denne Macens Metal-kompilator?"), isPresented: $askMetal) {
-            Button(tr("Build anyway", "Bygg likevel")) {
+        .alert(L("Build with this Mac's Metal compiler?"), isPresented: $askMetal) {
+            Button(L("Build anyway")) {
                 settings.allowOtherMetal = true
                 startBuild()
             }
-            Button(tr("Cancel", "Avbryt"), role: .cancel) {}
+            Button(L("Cancel"), role: .cancel) {}
         } message: {
-            Text(tr("Your Xcode's Metal compiler is not the one nxnative tested its shaders with, so nxnative stops games that use NVN before their shaders. You can build with it anyway (untested: graphics glitches are possible), or install the tested Xcode beside yours first. The choice is kept for later builds.",
-                    "Xcode-versjonen din har ikke Metal-kompilatoren nxnative testet shaderne med, så nxnative stopper spill som bruker NVN før shaderne. Du kan bygge med den likevel (ikke testet: grafikkfeil kan forekomme), eller installere den testede Xcode-versjonen ved siden av først. Valget huskes til senere bygg."))
+            Text(L("Your Xcode's Metal compiler is not the one nxnative tested its shaders with, so nxnative stops games that use NVN before their shaders. You can build with it anyway (untested: graphics glitches are possible), or install the tested Xcode beside yours first. The choice is kept for later builds."))
         }
-        .alert(tr("Cannot build yet", "Kan ikke bygge ennå"), isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
+        .alert(L("Cannot build yet"), isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
             Button("OK") {}
         } message: {
             Text(problem ?? "")
@@ -164,7 +159,7 @@ struct BuildView: View {
 
     @ViewBuilder private var gameFiles: some View {
         if files.isEmpty {
-            Text(tr("No NSP, XCI, NSZ or NUP files here.", "Fant ingen NSP-, XCI-, NSZ- eller NUP-filer her."))
+            Text(L("No NSP, XCI, NSZ or NUP files here."))
                 .foregroundStyle(.secondary)
         } else {
             ForEach(files) { file in
@@ -190,9 +185,9 @@ struct BuildView: View {
                     Image(systemName: freeSpace < needed ? "exclamationmark.triangle.fill" : "internaldrive")
                         .foregroundStyle(freeSpace < needed ? .orange : .secondary)
                         .frame(width: 18)
-                    Text(tr("Free space: \(formatBytes(freeSpace))", "Ledig plass: \(formatBytes(freeSpace))")
-                         + (hasOldBuild ? tr(" · an earlier build is here, so the next one is faster", " · tidligere bygg finnes, neste bygg går raskere")
-                                        : tr(" · a first build needs about \(formatBytes(needed))", " · første bygg trenger ca. \(formatBytes(needed))")))
+                    Text(L("Free space: %@", "\(formatBytes(freeSpace))")
+                         + (hasOldBuild ? L(" · an earlier build is here, so the next one is faster")
+                                        : L(" · a first build needs about %@", "\(formatBytes(needed))")))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -206,31 +201,31 @@ struct BuildView: View {
                 Button {
                     showSetup()
                 } label: {
-                    Label(tr("Something is missing in Setup", "Noe mangler i oppsettet"), systemImage: "exclamationmark.triangle.fill")
+                    Label(L("Something is missing in Setup"), systemImage: "exclamationmark.triangle.fill")
                 }
                 .buttonStyle(.link)
             }
             Spacer()
             switch runner.state {
             case .running:
-                Button(tr("Stop", "Avbryt"), role: .cancel) { runner.cancel() }
+                Button(L("Stop"), role: .cancel) { runner.cancel() }
                     .keyboardShortcut(.cancelAction)
             case .moving:
                 ProgressView().controlSize(.small)
             case .succeeded(let app):
-                Button(tr("Keyboard and controllers", "Tastatur og kontroller")) { showControls = true }
-                Button(tr("Show in Finder", "Vis i Finder")) { NSWorkspace.shared.revealInFinder(app) }
-                Button(tr("Build again", "Bygg på nytt")) { startBuild() }
+                Button(L("Keyboard and controllers")) { showControls = true }
+                Button(L("Show in Finder")) { NSWorkspace.shared.revealInFinder(app) }
+                Button(L("Build again")) { startBuild() }
                 Button {
                     NSWorkspace.shared.open(URL(fileURLWithPath: app))
                 } label: {
-                    Label(tr("Play", "Spill nå"), systemImage: "play.fill")
+                    Label(L("Play now"), systemImage: "play.fill")
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
             case .failed(let reason):
                 if let folder = runner.buildFolder, FileManager.default.fileExists(atPath: folder + "/logs") {
-                    Button(tr("Open the logs", "Åpne loggene")) { NSWorkspace.shared.openFolder(folder + "/logs") }
+                    Button(L("Open the logs")) { NSWorkspace.shared.openFolder(folder + "/logs") }
                 }
                 if let fix = BuildFix(reason: reason, settings: model.settings) {
                     Button(fix.label) {
@@ -252,7 +247,7 @@ struct BuildView: View {
         Button {
             startBuild()
         } label: {
-            Label(tr("Build the game", "Bygg spillet"), systemImage: "hammer.fill")
+            Label(L("Build the game"), systemImage: "hammer.fill")
         }
         .buttonStyle(.borderedProminent)
         .keyboardShortcut(.defaultAction)
@@ -286,14 +281,14 @@ struct BuildView: View {
         let target = folder.appendingPathComponent(url.lastPathComponent)
         do {
             if fm.fileExists(atPath: target.path) {
-                problem = tr("\(folder.path.tildePath) already has a file of that name.", "Det finnes allerede en fil med samme navn i \(folder.path.tildePath).")
+                problem = L("%@ already has a file of that name.", "\(folder.path.tildePath)")
                 return
             }
             try fm.createDirectory(at: folder, withIntermediateDirectories: true)
             try fm.moveItem(at: url, to: target)   // the same folder's volume: a rename, instant
             model.settings.gamePath = folder.path
         } catch {
-            problem = tr("Could not move the file: \(error.localizedDescription)", "Kunne ikke flytte filen: \(error.localizedDescription)")
+            problem = L("Could not move the file: %@", "\(error.localizedDescription)")
         }
     }
 
@@ -328,34 +323,31 @@ struct BuildView: View {
         let settings = model.settings
         let fm = FileManager.default
         guard !model.tasks.isRunning else {
-            problem = tr("“\(model.tasks.title)” is running in Setup. Build when it is done.", "«\(model.tasks.title)» kjører under Oppsett. Bygg når den er ferdig.")
+            problem = L("“%@” is running in Setup. Build when it is done.", "\(model.tasks.title)")
             return
         }
         guard fm.fileExists(atPath: settings.gamePath) else {
-            problem = tr("Choose the game files first.", "Velg spillfilene først.")
+            problem = L("Choose the game files first.")
             return
         }
         guard !files.isEmpty else {
-            problem = tr("The folder has no game files (NSP, XCI, NSZ, XCZ or NUP).", "Mappen har ingen spillfiler (NSP, XCI, NSZ, XCZ eller NUP).")
+            problem = L("The folder has no game files (NSP, XCI, NSZ, XCZ or NUP).")
             return
         }
         if files.contains(where: \.needsKeys) && !fm.fileExists(atPath: settings.keysPath) {
-            problem = tr("NSP and XCI files need the prod.keys from your own Switch. Choose the file under Settings.",
-                         "NSP- og XCI-filer trenger prod.keys fra din egen Switch. Velg filen under Innstillinger.")
+            problem = L("NSP and XCI files need the prod.keys from your own Switch. Choose the file under Settings.")
             return
         }
         guard settings.hasRepo else {
-            problem = tr("nxnative was not found in \(settings.repoPath.tildePath). Download it or choose its folder in Setup.",
-                         "Fant ikke nxnative i \(settings.repoPath.tildePath). Last den ned eller velg mappen under Oppsett.")
+            problem = L("nxnative was not found in %@. Download it or choose its folder in Setup.", "\(settings.repoPath.tildePath)")
             return
         }
         guard fm.isExecutableFile(atPath: settings.python) else {
-            problem = tr("There is no Python environment for the build script yet. Set it up in Setup.",
-                         "Det finnes ikke noe Python-miljø for byggeskriptet ennå. Sett det opp under Oppsett.")
+            problem = L("There is no Python environment for the build script yet. Set it up in Setup.")
             return
         }
         if settings.destination == .custom && settings.customDestPath.isEmpty {
-            problem = tr("Choose the folder the app goes in.", "Velg mappen appen skal lagres i.")
+            problem = L("Choose the folder the app goes in.")
             return
         }
         // A game known not to use NVN needs no answer about the Metal compiler.
@@ -401,8 +393,8 @@ enum BuildFix {
 
     var label: String {
         switch self {
-        case .withoutFastBuild: tr("Build without fast build", "Bygg uten raskt bygg")
-        case .allowOtherMetal: tr("Build with this Metal compiler", "Bygg med denne Metal-kompilatoren")
+        case .withoutFastBuild: L("Build without fast build")
+        case .allowOtherMetal: L("Build with this Metal compiler")
         }
     }
 
@@ -410,11 +402,9 @@ enum BuildFix {
     var explanation: String {
         switch self {
         case .withoutFastBuild:
-            tr("This game has no list of the shaders nxnative's playtests used, so a fast build is not possible. It has to be built with every shader.",
-               "Dette spillet har ingen liste over shaderne fra nxnatives testspilling, så «Raskt bygg» går ikke. Det må bygges med alle shaderne.")
+            L("This game has no list of the shaders nxnative's playtests used, so a fast build is not possible. It has to be built with every shader.")
         case .allowOtherMetal:
-            tr("Your Xcode does not have the Metal compiler nxnative was tested with. You can build with yours anyway (untested, graphics glitches are possible), or install the tested Xcode beside it and build again.",
-               "Xcode-versjonen din har ikke Metal-kompilatoren nxnative er testet med. Du kan bygge med denne likevel (ikke testet, grafikkfeil kan forekomme), eller installere den testede Xcode-versjonen ved siden av og bygge på nytt.")
+            L("Your Xcode does not have the Metal compiler nxnative was tested with. You can build with yours anyway (untested, graphics glitches are possible), or install the tested Xcode beside it and build again.")
         }
     }
 
@@ -439,13 +429,13 @@ struct ProgressPanel: View {
                 RecipeCard(report: report, recipe: model.recipes.recipe(report.id))
             }
             HStack {
-                Text(tr("Log", "Logg")).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Text(L("Log")).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 Spacer()
                 Button {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(runner.logText, forType: .string)
                 } label: {
-                    Label(tr("Copy log", "Kopier loggen"), systemImage: "doc.on.doc")
+                    Label(L("Copy log"), systemImage: "doc.on.doc")
                 }
                 .buttonStyle(.borderless).font(.caption)
                 .disabled(runner.log.isEmpty)
@@ -460,8 +450,8 @@ struct ProgressPanel: View {
         case .running:
             HStack(alignment: .firstTextBaseline) {
                 Text(runner.stageCount > 0
-                     ? tr("Step \(runner.stageIndex) of \(runner.stageCount): \(runner.stageName)", "Steg \(runner.stageIndex) av \(runner.stageCount): \(runner.stageName)")
-                     : tr("Starting …", "Starter …"))
+                     ? L("Step %@ of %@: %@", "\(runner.stageIndex)", "\(runner.stageCount)", "\(runner.stageName)")
+                     : L("Starting …"))
                     .font(.headline)
                 Spacer()
                 if let start = runner.startedAt {
@@ -481,29 +471,27 @@ struct ProgressPanel: View {
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
                 if let eta = runner.eta, eta > 0 {
-                    Text(tr("about \(formatDuration(eta)) left in this step", "ca. \(formatDuration(eta)) igjen av dette steget")).monospacedDigit()
+                    Text(L("about %@ left in this step", "\(formatDuration(eta))")).monospacedDigit()
                 }
             }
             .font(.caption).foregroundStyle(.secondary)
-            Text(tr("A game's first build takes from a few minutes to about an hour. The Mac stays awake until it is done.",
-                    "Første bygg av et spill kan ta fra noen minutter til rundt en time. Macen holdes våken så lenge."))
+            Text(L("A game's first build takes from a few minutes to about an hour. The Mac stays awake until it is done."))
                 .font(.caption).foregroundStyle(.tertiary)
         case .moving(let folder):
             HStack {
                 ProgressView().controlSize(.small)
-                Text(tr("Moving the app to \(folder.tildePath) …", "Flytter appen til \(folder.tildePath) …"))
+                Text(L("Moving the app to %@ …", "\(folder.tildePath)"))
             }
         case .succeeded(let app):
             Label {
                 VStack(alignment: .leading, spacing: 3) {
                     let name = (app.lastPathComponent as NSString).deletingPathExtension
-                    Text(tr("Done! \(name) is ready.", "Ferdig! \(name) er klar.")).font(.headline)
+                    Text(L("Done! %@ is ready.", "\(name)")).font(.headline)
                     Text(app.tildePath).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
                     if let start = runner.startedAt, let end = runner.finishedAt {
-                        Text(tr("Took \(formatDuration(end.timeIntervalSince(start))).", "Tok \(formatDuration(end.timeIntervalSince(start))).")).font(.caption).foregroundStyle(.secondary)
+                        Text(L("Took %@.", "\(formatDuration(end.timeIntervalSince(start)))")).font(.caption).foregroundStyle(.secondary)
                     }
-                    Text(tr("The first start takes a few minutes: macOS shows “Verifying …” while it checks the new app. Later starts take seconds.",
-                            "Første start tar noen minutter: macOS viser «Verifiserer …» mens den sjekker den nye appen. Senere starter tar sekunder."))
+                    Text(L("The first start takes a few minutes: macOS shows “Verifying …” while it checks the new app. Later starts take seconds."))
                         .font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -513,20 +501,19 @@ struct ProgressPanel: View {
         case .failed(let reason):
             Label {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(tr("The build stopped", "Bygget stoppet")).font(.headline)
+                    Text(L("The build stopped")).font(.headline)
                     if let fix = BuildFix(reason: reason) {
                         Text(fix.explanation).font(.callout)
                     }
                     Text(reason).font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
-                    Text(tr("More: the logs in the game's _build folder. To ask for help, copy the log below.",
-                            "Mer: loggene i spillets _build-mappe. Kopier loggen under hvis du vil be om hjelp."))
+                    Text(L("More: the logs in the game's _build folder. To ask for help, copy the log below."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             } icon: {
                 Image(systemName: "xmark.octagon.fill").foregroundStyle(.red).font(.title2)
             }
         case .cancelled:
-            Label(tr("The build was stopped. What was done is reused next time.", "Bygget ble avbrutt. Det som ble ferdig, blir gjenbrukt neste gang."), systemImage: "stop.circle")
+            Label(L("The build was stopped. What was done is reused next time."), systemImage: "stop.circle")
         case .idle:
             EmptyView()
         }

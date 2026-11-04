@@ -38,14 +38,13 @@ final class TaskRunner {
                 append(.stage, s.title)
                 let status = await runStep(s)
                 if status != 0 {
-                    state = .failed(cancelled ? tr("Stopped.", "Stoppet.")
-                                              : tr("“\(s.title)” failed (exit code \(status)). See the output above.",
-                                                   "«\(s.title)» feilet (kode \(status)). Se utskriften over."))
+                    state = .failed(cancelled ? L("Stopped.")
+                                              : L("“%@” failed (exit code %@). See the output above.", "\(s.title)", "\(status)"))
                     finish?(false)
                     return
                 }
             }
-            append(.ok, tr("Done.", "Ferdig."))
+            append(.ok, L("Done."))
             state = .done
             finish?(true)
         }
@@ -111,7 +110,7 @@ struct SetupError: Error, Sendable {
 enum SetupSteps {
     /// Clones nxnative into `folder`.
     static func clone(into folder: String) -> [TaskStep] {
-        [TaskStep(title: tr("Downloading nxnative", "Laster ned nxnative"),
+        [TaskStep(title: L("Downloading nxnative"),
                   exe: "/usr/bin/git", args: ["clone", "--progress", AppPaths.nxnativeURL, folder])]
     }
 
@@ -124,12 +123,12 @@ enum SetupSteps {
         let packages = ["capstone>=5,<6", "fonttools", "lz4"]
         var env = Shell.environment()
         env["PYLZ4_USE_SYSTEM_LZ4"] = "0"
-        let check = TaskStep(title: tr("Checking the packages", "Sjekker pakkene"), exe: py, args: ["-c", PythonCheck.script])
+        let check = TaskStep(title: L("Checking the packages"), exe: py, args: ["-c", PythonCheck.script])
         if let uv = Shell.which("uv") {
             return .success([
-                TaskStep(title: tr("Creating the Python environment", "Lager Python-miljøet"),
+                TaskStep(title: L("Creating the Python environment"),
                          exe: uv, args: ["venv", "--clear", "--python", "cpython-3.14-macos-aarch64-none", venv], env: env),
-                TaskStep(title: tr("Installing capstone, fonttools and lz4", "Installerer capstone, fonttools og lz4"),
+                TaskStep(title: L("Installing capstone, fonttools and lz4"),
                          exe: uv, args: ["pip", "install", "--python", py] + packages, env: env),
                 check,
             ])
@@ -139,24 +138,23 @@ enum SetupSteps {
             guard let base = Shell.which(name),
                   Shell.run(base, ["-c", "import platform; print(platform.machine())"], timeout: 20).trimmed == "arm64" else { continue }
             return .success([
-                TaskStep(title: tr("Creating the Python environment", "Lager Python-miljøet"),
+                TaskStep(title: L("Creating the Python environment"),
                          exe: base, args: ["-m", "venv", "--clear", venv], env: env),
-                TaskStep(title: tr("Installing capstone, fonttools and lz4", "Installerer capstone, fonttools og lz4"),
+                TaskStep(title: L("Installing capstone, fonttools and lz4"),
                          exe: py, args: ["-m", "pip", "install"] + packages + (minor < 14 ? ["backports.zstd"] : []), env: env),
                 check,
             ])
         }
-        return .failure(SetupError(message: tr("No uv and no Apple silicon Python 3.12 or later. Install uv with Homebrew (brew install uv), then try again.",
-                           "Fant verken uv eller Python 3.12 eller nyere. Installer uv med Homebrew (brew install uv), og prøv igjen.")))
+        return .failure(SetupError(message: L("No uv and no Apple silicon Python 3.12 or later. Install uv with Homebrew (brew install uv), then try again.")))
     }
 
     static func metalToolchain() -> [TaskStep] {
-        [TaskStep(title: tr("Downloading the Metal toolchain (a large download)", "Laster ned Metal-verktøyene (en stor nedlasting)"),
+        [TaskStep(title: L("Downloading the Metal toolchain (a large download)"),
                   exe: "/usr/bin/xcodebuild", args: ["-downloadComponent", "MetalToolchain"])]
     }
 
     static func update(repo: String) -> [TaskStep] {
-        [TaskStep(title: tr("Fetching the latest nxnative", "Henter siste nxnative"),
+        [TaskStep(title: L("Fetching the latest nxnative"),
                   exe: "/usr/bin/git", args: ["-C", repo, "pull", "--ff-only"])]
     }
 }

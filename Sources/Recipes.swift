@@ -15,7 +15,7 @@ struct Recipe: Identifiable, Hashable, Sendable {
     var baseOnly: Bool { build.contains("(base)") }
 
     var buildLabel: String {
-        baseOnly ? build.replacingOccurrences(of: " (base)", with: "") + tr(" (no update)", " (uten oppdatering)") : build
+        baseOnly ? build.replacingOccurrences(of: " (base)", with: "") + L(" (no update)") : build
     }
 
     var noteURL: URL? { URL(string: "https://github.com/seedds/nxnative/blob/main/dm/games/\(titleID)/README.md") }

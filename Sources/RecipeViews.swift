@@ -21,7 +21,7 @@ struct RecipeCard: View {
             }
             Spacer(minLength: 8)
             if let url = recipe?.noteURL, !report.provisional {
-                Link(tr("Read the recipe", "Les oppskriften"), destination: url).font(.caption)
+                Link(L("Read the recipe"), destination: url).font(.caption)
             }
         }
         .padding(10)
@@ -30,7 +30,7 @@ struct RecipeCard: View {
     }
 
     private var name: String { recipe?.name ?? report.id }
-    private var madeFor: String { recipe?.buildLabel ?? tr("another version", "en annen versjon") }
+    private var madeFor: String { recipe?.buildLabel ?? L("another version") }
 
     private enum Level { case ok, info, warn, bad }
 
@@ -61,27 +61,24 @@ struct RecipeCard: View {
 
     private var title: String {
         switch level {
-        case .bad: tr("No recipe for this game", "Ingen oppskrift for dette spillet")
-        case .warn: tr("\(name): wrong version for the recipe", "\(name): feil versjon for oppskriften")
-        case .ok, .info: tr("Recipe: \(name)", "Oppskrift: \(name)")
+        case .bad: L("No recipe for this game")
+        case .warn: L("%@: wrong version for the recipe", "\(name)")
+        case .ok, .info: L("Recipe: %@", "\(name)")
         }
     }
 
     private var detail: String {
         switch level {
         case .bad:
-            return tr("nxnative has no setup for this game (\(report.id)) yet. The script guesses one, and the app may not start.",
-                      "nxnative har ikke laget et oppsett for spillet (\(report.id)) ennå. Skriptet gjetter et, og appen starter kanskje ikke.")
+            return L("nxnative has no setup for this game (%@) yet. The script guesses one, and the app may not start.", "\(report.id)")
         case .warn:
-            let yours = report.yourVersion ?? tr("another version", "en annen versjon")
-            return tr("The recipe was made for \(madeFor), but you are building \(yours). Its fixes apply to that version only, so the game may misbehave or not start. Put the \(madeFor) update in the game folder and build again; what is already extracted is reused.",
-                      "Oppskriften er laget for \(madeFor), men du bygger \(yours). Rettelsene i oppskriften gjelder bare den versjonen, så spillet kan få feil eller ikke starte. Legg oppdateringen \(madeFor) i spillmappen og bygg på nytt; det som alt er pakket ut, gjenbrukes.")
+            let yours = report.yourVersion ?? L("another version")
+            return L("The recipe was made for %@, but you are building %@. Its fixes apply to that version only, so the game may misbehave or not start. Put the %@ update in the game folder and build again; what is already extracted is reused.", "\(madeFor)", "\(yours)", "\(madeFor)")
         case .info:
-            return tr("Made for \(madeFor). Every fix applies, but the folder lacks a version the recipe's shader tables were made from, so they are made from your files.",
-                      "Laget for \(madeFor). Alle rettelsene brukes, men mappen mangler en versjon oppskriftens shadertabeller ble laget fra, så de lages fra filene du har.")
+            return L("Made for %@. Every fix applies, but the folder lacks a version the recipe's shader tables were made from, so they are made from your files.", "\(madeFor)")
         case .ok:
-            return tr("Made for \(madeFor)", "Laget for \(madeFor)")
-                + (report.yourVersion.map { tr(", and you are building \($0). Every fix applies.", ", og du bygger \($0). Alle rettelsene brukes.") } ?? ".")
+            return L("Made for %@", "\(madeFor)")
+                + (report.yourVersion.map { L(", and you are building %@. Every fix applies.", "\($0)") } ?? ".")
         }
     }
 }
@@ -95,19 +92,17 @@ struct RecipeHintRow: View {
         if let id = check.titleID {
             if check.hasProfile || recipe != nil {
                 row(icon: matchIcon, color: matchColor,
-                    title: tr("Recipe: ", "Oppskrift: ") + (recipe?.name ?? check.profileName ?? id),
+                    title: L("Recipe: ") + (recipe?.name ?? check.profileName ?? id),
                     detail: matchDetail)
             } else {
                 row(icon: "exclamationmark.triangle.fill", color: .orange,
-                    title: tr("No recipe for \(id)", "Ingen oppskrift for \(id)"),
-                    detail: tr("nxnative has no setup for this game yet. The build guesses one, and the app may not start.",
-                               "nxnative har ikke laget et oppsett for dette spillet ennå. Bygget gjetter et, og appen starter kanskje ikke."))
+                    title: L("No recipe for %@", "\(id)"),
+                    detail: L("nxnative has no setup for this game yet. The build guesses one, and the app may not start."))
             }
         } else {
             row(icon: "book.closed", color: .secondary,
-                title: tr("Recipe", "Oppskrift"),
-                detail: tr("The file names do not say which game this is. Which recipe is used, and whether the version fits, shows when the build starts.",
-                           "Filnavnene sier ikke hvilket spill det er. Hvilken oppskrift som brukes, og om versjonen stemmer, ser du når bygget starter."))
+                title: L("Recipe"),
+                detail: L("The file names do not say which game this is. Which recipe is used, and whether the version fits, shows when the build starts."))
         }
     }
 
@@ -134,14 +129,12 @@ struct RecipeHintRow: View {
     private var matchDetail: String {
         switch check.versionMatches {
         case true?:
-            return tr("Made for \(madeFor), and the folder has that version.", "Laget for \(madeFor), og mappen har den versjonen.")
+            return L("Made for %@, and the folder has that version.", "\(madeFor)")
         case false?:
-            let newest = check.newestTag ?? tr("another version", "en annen versjon")
-            return tr("Made for \(madeFor), but the folder's newest file is \(newest). Put the \(madeFor) update in the folder, or the recipe's fixes do not apply.",
-                      "Laget for \(madeFor), men mappens nyeste fil er \(newest). Legg oppdateringen \(madeFor) i mappen, ellers gjelder ikke rettelsene i oppskriften.")
+            let newest = check.newestTag ?? L("another version")
+            return L("Made for %@, but the folder's newest file is %@. Put the %@ update in the folder, or the recipe's fixes do not apply.", "\(madeFor)", "\(newest)", "\(madeFor)")
         case nil:
-            return tr("Made for \(madeFor). The file names do not give the version; it shows when the build starts.",
-                      "Laget for \(madeFor). Filnavnene sier ikke versjonen; det ser du når bygget starter.")
+            return L("Made for %@. The file names do not give the version; it shows when the build starts.", "\(madeFor)")
         }
     }
 
@@ -173,31 +166,30 @@ struct RecipeListView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(tr("Games with a recipe in nxnative", "Spill med oppskrift i nxnative")).font(.title3.weight(.semibold))
+                    Text(L("Games with a recipe in nxnative")).font(.title3.weight(.semibold))
                     Spacer()
-                    Text(tr("\(model.recipes.recipes.count) games", "\(model.recipes.recipes.count) spill")).foregroundStyle(.secondary)
+                    Text(L("%@ games", "\(model.recipes.recipes.count)")).foregroundStyle(.secondary)
                 }
-                Text(tr("The base game and update must be the version in the list, or the recipe's fixes do not apply. Double-click a game to read its recipe.",
-                        "Grunnspillet og oppdateringen må være versjonen i listen, ellers gjelder ikke rettelsene i oppskriften. Dobbeltklikk på et spill for å lese oppskriften."))
+                Text(L("The base game and update must be the version in the list, or the recipe's fixes do not apply. Double-click a game to read its recipe."))
                     .font(.caption).foregroundStyle(.secondary)
-                TextField(tr("Search by name or title ID", "Søk etter navn eller title ID"), text: $filter)
+                TextField(L("Search by name or title ID"), text: $filter)
                     .textFieldStyle(.roundedBorder)
             }
             .padding(16)
 
             Table(shown, selection: $selection) {
-                TableColumn(tr("Game", "Spill"), value: \.name)
+                TableColumn(L("Game"), value: \.name)
                     .width(min: 240, ideal: 340)
-                TableColumn(tr("Version", "Versjon")) { Text($0.buildLabel) }
+                TableColumn(L("Version")) { Text($0.buildLabel) }
                     .width(min: 90, ideal: 130, max: 170)
                 TableColumn("Title ID") { Text($0.titleID).font(.system(.body, design: .monospaced)) }
                     .width(min: 140, ideal: 150, max: 160)
-                TableColumn(tr("Graphics", "Grafikk"), value: \.graphics)
+                TableColumn(L("Graphics"), value: \.graphics)
                     .width(min: 60, ideal: 70, max: 90)
             }
             .contextMenu(forSelectionType: Recipe.ID.self) { ids in
                 if let id = ids.first, let url = model.recipes.recipe(id)?.noteURL {
-                    Button(tr("Read the recipe", "Les oppskriften")) { NSWorkspace.shared.open(url) }
+                    Button(L("Read the recipe")) { NSWorkspace.shared.open(url) }
                 }
             } primaryAction: { ids in
                 if let id = ids.first, let url = model.recipes.recipe(id)?.noteURL { NSWorkspace.shared.open(url) }
@@ -205,10 +197,10 @@ struct RecipeListView: View {
 
             HStack {
                 if model.recipes.recipes.isEmpty {
-                    Text(tr("The games table was not found. Check the nxnative folder in Setup.", "Fant ikke spilltabellen. Sjekk nxnative-mappen under Oppsett.")).font(.caption).foregroundStyle(.orange)
+                    Text(L("The games table was not found. Check the nxnative folder in Setup.")).font(.caption).foregroundStyle(.orange)
                 }
                 Spacer()
-                Button(tr("Close", "Lukk")) { dismiss() }.keyboardShortcut(.defaultAction)
+                Button(L("Close")) { dismiss() }.keyboardShortcut(.defaultAction)
             }
             .padding(12)
         }

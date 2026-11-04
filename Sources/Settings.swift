@@ -6,9 +6,9 @@ enum Destination: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .applications: tr("Applications folder", "Programmer-mappen")
-        case .gameFolder: tr("Next to the game files", "Samme mappe som spillfilene")
-        case .custom: tr("Another folder", "En annen mappe")
+        case .applications: L("Applications folder")
+        case .gameFolder: L("Next to the game files")
+        case .custom: L("Another folder")
         }
     }
 }
@@ -22,22 +22,22 @@ struct GameLanguage: Identifiable, Hashable {
 /// The codes `build_ipa_from_nsp.py -l` accepts. The game must support the one picked.
 var gameLanguages: [GameLanguage] {
     [
-        .init(code: "", name: tr("English (default)", "Engelsk (standard)")),
-        .init(code: "en-GB", name: tr("English (UK)", "Engelsk (britisk)")),
-        .init(code: "ja", name: tr("Japanese", "Japansk")),
-        .init(code: "fr", name: tr("French", "Fransk")),
-        .init(code: "fr-CA", name: tr("French (Canada)", "Fransk (kanadisk)")),
-        .init(code: "de", name: tr("German", "Tysk")),
-        .init(code: "es", name: tr("Spanish", "Spansk")),
-        .init(code: "es-419", name: tr("Spanish (Latin America)", "Spansk (latinamerikansk)")),
-        .init(code: "it", name: tr("Italian", "Italiensk")),
-        .init(code: "nl", name: tr("Dutch", "Nederlandsk")),
-        .init(code: "pt", name: tr("Portuguese", "Portugisisk")),
-        .init(code: "pt-BR", name: tr("Portuguese (Brazil)", "Portugisisk (brasiliansk)")),
-        .init(code: "ru", name: tr("Russian", "Russisk")),
-        .init(code: "ko", name: tr("Korean", "Koreansk")),
-        .init(code: "zh-Hans", name: tr("Chinese (Simplified)", "Kinesisk (forenklet)")),
-        .init(code: "zh-Hant", name: tr("Chinese (Traditional)", "Kinesisk (tradisjonell)")),
+        .init(code: "", name: L("English (default)")),
+        .init(code: "en-GB", name: L("English (UK)")),
+        .init(code: "ja", name: L("Japanese")),
+        .init(code: "fr", name: L("French")),
+        .init(code: "fr-CA", name: L("French (Canada)")),
+        .init(code: "de", name: L("German")),
+        .init(code: "es", name: L("Spanish")),
+        .init(code: "es-419", name: L("Spanish (Latin America)")),
+        .init(code: "it", name: L("Italian")),
+        .init(code: "nl", name: L("Dutch")),
+        .init(code: "pt", name: L("Portuguese")),
+        .init(code: "pt-BR", name: L("Portuguese (Brazil)")),
+        .init(code: "ru", name: L("Russian")),
+        .init(code: "ko", name: L("Korean")),
+        .init(code: "zh-Hans", name: L("Chinese (Simplified)")),
+        .init(code: "zh-Hant", name: L("Chinese (Traditional)")),
     ]
 }
 
@@ -92,7 +92,7 @@ final class AppSettings {
         allowOtherMetal = d.bool(forKey: "allowOtherMetal")
         seenShaders = d.bool(forKey: "seenShaders")
         notify = d.object(forKey: "notify") as? Bool ?? true
-        appLanguage = AppLanguage(rawValue: d.string(forKey: L10n.defaultsKey) ?? "") ?? .system
+        appLanguage = AppLanguage(stored: d.string(forKey: L10n.defaultsKey))
         knownApps = d.stringArray(forKey: "knownApps") ?? []
         appSources = d.dictionary(forKey: "appSources") as? [String: String] ?? [:]
     }

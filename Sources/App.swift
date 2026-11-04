@@ -22,11 +22,11 @@ struct NXBuilderApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .appInfo) {
-                Button(tr("About NX Builder", "Om NX Builder")) { AppDelegate.showAbout() }
+                Button(L("About NX Builder")) { AppDelegate.showAbout() }
             }
             CommandGroup(replacing: .help) {
-                Link(tr("nxnative on GitHub", "nxnative på GitHub"), destination: URL(string: "https://github.com/seedds/nxnative")!)
-                Link(tr("The games nxnative supports", "Spillene nxnative støtter"), destination: URL(string: "https://github.com/seedds/nxnative#games")!)
+                Link(L("nxnative on GitHub"), destination: URL(string: "https://github.com/seedds/nxnative")!)
+                Link(L("The games nxnative supports"), destination: URL(string: "https://github.com/seedds/nxnative#games")!)
             }
         }
     }
@@ -48,28 +48,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         let runner = AppModel.shared.runner, tasks = AppModel.shared.tasks
         if case .moving = runner.state {
             let alert = NSAlert()
-            alert.messageText = tr("The game app is being moved", "Spill-appen flyttes")
-            alert.informativeText = tr("Quit when it is done, or the app would be left half copied.", "Avslutt når den er ferdig, ellers blir appen halvveis kopiert.")
+            alert.messageText = L("The game app is being moved")
+            alert.informativeText = L("Quit when it is done, or the app would be left half copied.")
             alert.runModal()
             return .terminateCancel
         }
         if tasks.isRunning {
             let alert = NSAlert()
-            alert.messageText = tr("“\(tasks.title)” is still running", "«\(tasks.title)» kjører fortsatt")
-            alert.informativeText = tr("Quitting stops it. You can run it again from Setup.", "Hvis du avslutter, stoppes den. Du kan kjøre den på nytt fra Oppsett.")
-            alert.addButton(withTitle: tr("Keep going", "Fortsett"))
-            alert.addButton(withTitle: tr("Stop and quit", "Stopp og avslutt"))
+            alert.messageText = L("“%@” is still running", "\(tasks.title)")
+            alert.informativeText = L("Quitting stops it. You can run it again from Setup.")
+            alert.addButton(withTitle: L("Keep going"))
+            alert.addButton(withTitle: L("Stop and quit"))
             guard alert.runModal() == .alertSecondButtonReturn else { return .terminateCancel }
             tasks.cancel()
             return .terminateNow
         }
         guard runner.hasProcess else { return .terminateNow }
         let alert = NSAlert()
-        alert.messageText = tr("A game is still being built", "Et spill bygges fortsatt")
-        alert.informativeText = tr("Quitting stops the build. What is already done is reused the next time you build.",
-                                   "Hvis du avslutter, stoppes bygget. Det som allerede er ferdig, blir gjenbrukt neste gang du bygger.")
-        alert.addButton(withTitle: tr("Keep building", "Fortsett å bygge"))
-        alert.addButton(withTitle: tr("Stop and quit", "Stopp og avslutt"))
+        alert.messageText = L("A game is still being built")
+        alert.informativeText = L("Quitting stops the build. What is already done is reused the next time you build.")
+        alert.addButton(withTitle: L("Keep building"))
+        alert.addButton(withTitle: L("Stop and quit"))
         if alert.runModal() == .alertSecondButtonReturn {
             runner.stopForQuit()
             return .terminateNow
@@ -84,8 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     @MainActor static func showAbout() {
         let credits = NSMutableAttributedString(
-            string: tr("A front end for nxnative by seedds (MIT licence), which runs Switch games you own natively on Apple silicon. NX Builder contains no game files or keys.",
-                       "Et grensesnitt for nxnative av seedds (MIT-lisens), som kjører Switch-spill du eier direkte på Apple silicon. NX Builder inneholder ingen spillfiler eller nøkler."),
+            string: L("A front end for nxnative by seedds (MIT licence), which runs Switch games you own natively on Apple silicon. NX Builder contains no game files or keys."),
             attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor])
         NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
         NSApp.activate()

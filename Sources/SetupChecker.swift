@@ -75,9 +75,9 @@ final class SetupChecker {
         // Apple silicon
         let arm = Shell.run("/usr/sbin/sysctl", ["-n", "hw.optional.arm64"], env: env, timeout: 5).trimmed == "1"
         report.items.append(arm
-            ? CheckItem(id: "arm", title: "Apple silicon", status: .ok, detail: tr("This Mac has an M-series chip.", "Macen har en M-brikke."))
+            ? CheckItem(id: "arm", title: "Apple silicon", status: .ok, detail: L("This Mac has an M-series chip."))
             : CheckItem(id: "arm", title: "Apple silicon", status: .fail,
-                        detail: tr("nxnative needs a Mac with M1 or newer.", "nxnative trenger en Mac med M1 eller nyere.")))
+                        detail: L("nxnative needs a Mac with M1 or newer.")))
 
         // Xcode, selected and licensed
         let selected = Shell.run("/usr/bin/xcode-select", ["-p"], env: env, timeout: 10).trimmed
@@ -88,29 +88,26 @@ final class SetupChecker {
             report.items.append(CheckItem(id: "xcode", title: "Xcode", status: .ok, detail: "\(xcodeVersion) · \(selected.tildePath)"))
         } else if selected.contains("CommandLineTools"), let xcode = xcodes.first {
             report.items.append(CheckItem(id: "xcode", title: "Xcode", status: .fail,
-                detail: tr("The Command Line Tools are selected instead of Xcode. Select Xcode in Terminal (it asks for your password):",
-                           "Kommandolinjeverktøyene er valgt i stedet for Xcode. Velg Xcode i Terminal (den spør etter passordet ditt):"),
+                detail: L("The Command Line Tools are selected instead of Xcode. Select Xcode in Terminal (it asks for your password):"),
                 fixes: [.command("sudo xcode-select -s \"\(xcode)/Contents/Developer\"")]))
         } else if xcodebuild.output.lowercased().contains("license") {
             report.items.append(CheckItem(id: "xcode", title: "Xcode", status: .fail,
-                detail: tr("Xcode's licence has not been accepted. Open Xcode once, or run in Terminal:",
-                           "Xcode-lisensen er ikke godtatt. Åpne Xcode én gang, eller kjør i Terminal:"),
+                detail: L("Xcode's licence has not been accepted. Open Xcode once, or run in Terminal:"),
                 fixes: [.command("sudo xcodebuild -license accept")]))
         } else {
             report.items.append(CheckItem(id: "xcode", title: "Xcode", status: .fail,
-                detail: tr("Install Xcode from the App Store and open it once.", "Installer Xcode fra App Store og åpne det én gang."),
-                fixes: [.link(tr("Open Xcode in the App Store", "Åpne Xcode i App Store"), "macappstore://apps.apple.com/app/id497799835")],
+                detail: L("Install Xcode from the App Store and open it once."),
+                fixes: [.link(L("Open Xcode in the App Store"), "macappstore://apps.apple.com/app/id497799835")],
                 more: xcodebuild.trimmed))
         }
 
         // The Metal toolchain (a separate download since Xcode 26)
         let metal = Shell.run("/usr/bin/xcrun", ["-sdk", "macosx", "metal", "--version"], env: env, timeout: 30)
         report.items.append(metal.ok
-            ? CheckItem(id: "metal", title: tr("Metal toolchain", "Metal-verktøyene"), status: .ok,
+            ? CheckItem(id: "metal", title: L("Metal toolchain"), status: .ok,
                         detail: metal.output.split(separator: "\n").first.map(String.init) ?? "")
-            : CheckItem(id: "metal", title: tr("Metal toolchain", "Metal-verktøyene"), status: .fail,
-                        detail: tr("Xcode's Metal toolchain is not installed. It compiles the games' shaders.",
-                                   "Metal-verktøyene til Xcode er ikke installert. De kompilerer spillenes shadere."),
+            : CheckItem(id: "metal", title: L("Metal toolchain"), status: .fail,
+                        detail: L("Xcode's Metal toolchain is not installed. It compiles the games' shaders."),
                         fixes: xcodebuild.ok ? [.action(.installMetal), .command("xcodebuild -downloadComponent MetalToolchain")] : [],
                         more: metal.trimmed))
 
@@ -120,17 +117,17 @@ final class SetupChecker {
         let missingFormulas = tools.filter { Shell.which($0.tool) == nil }.map(\.formula)
         let makeMissing = Shell.which("make") == nil
         if missingFormulas.isEmpty && !makeMissing {
-            report.items.append(CheckItem(id: "tools", title: tr("Command-line tools", "Kommandolinjeverktøy"), status: .ok,
+            report.items.append(CheckItem(id: "tools", title: L("Command-line tools"), status: .ok,
                                           detail: "git, zstd, glslang, make"))
         } else {
             var fixes: [CheckFix] = []
             if brew == nil {
-                fixes.append(.link(tr("Install Homebrew", "Installer Homebrew"), "https://brew.sh"))
+                fixes.append(.link(L("Install Homebrew"), "https://brew.sh"))
             }
             if !missingFormulas.isEmpty { fixes.append(.command("brew install " + missingFormulas.joined(separator: " "))) }
             let missing = missingFormulas + (makeMissing ? ["make (Xcode)"] : [])
-            report.items.append(CheckItem(id: "tools", title: tr("Command-line tools", "Kommandolinjeverktøy"), status: .fail,
-                detail: tr("Missing: \(missing.joined(separator: ", ")).", "Mangler: \(missing.joined(separator: ", "))."),
+            report.items.append(CheckItem(id: "tools", title: L("Command-line tools"), status: .fail,
+                detail: L("Missing: %@.", "\(missing.joined(separator: ", "))"),
                 fixes: fixes))
         }
 
@@ -144,20 +141,17 @@ final class SetupChecker {
         } else {
             report.items.append(CheckItem(id: "dotnet", title: ".NET 10 SDK", status: .fail,
                 detail: dotnet == nil
-                    ? tr("nxnative needs the .NET 10 SDK. The installer asks for your password.",
-                         "nxnative trenger .NET 10 SDK. Installasjonen spør etter passordet ditt.")
-                    : tr("dotnet is here, but not the .NET 10 SDK (a runtime alone is not enough). The installer asks for your password.",
-                         "dotnet finnes, men ikke .NET 10 SDK (bare kjøretiden er ikke nok). Installasjonen spør etter passordet ditt."),
+                    ? L("nxnative needs the .NET 10 SDK. The installer asks for your password.")
+                    : L("dotnet is here, but not the .NET 10 SDK (a runtime alone is not enough). The installer asks for your password."),
                 fixes: [.command("brew install --cask dotnet-sdk"),
-                        .link(tr(".NET 10 from Microsoft", ".NET 10 fra Microsoft"), "https://dotnet.microsoft.com/download/dotnet/10.0")],
+                        .link(L(".NET 10 from Microsoft"), "https://dotnet.microsoft.com/download/dotnet/10.0")],
                 more: sdks))
         }
 
         // nxnative itself
         guard fm.fileExists(atPath: repo + "/scripts/build_ipa_from_nsp.py") else {
             report.items.append(CheckItem(id: "repo", title: "nxnative", status: .fail,
-                detail: tr("nxnative was not found in \(repo.tildePath). Download it, or choose the folder you cloned it into.",
-                           "Fant ikke nxnative i \(repo.tildePath). Last den ned, eller velg mappen du klonet den til."),
+                detail: L("nxnative was not found in %@. Download it, or choose the folder you cloned it into.", "\(repo.tildePath)"),
                 fixes: [.action(.cloneNxnative), .action(.chooseRepo)]))
             report.items.append(pythonItem(python: python, ownPython: ownPython))
             report.items.append(keysItem(keys))
@@ -175,8 +169,8 @@ final class SetupChecker {
         if metal.ok && pyItem.status == .ok {
             let check = Shell.run(python, [repo + "/dm/gfx/tools/own_compilers.py", "--check-metal"], cwd: repo, env: env, timeout: 60)
             if check.ok {
-                report.items.append(CheckItem(id: "metalver", title: tr("Tested Metal version", "Testet Metal-versjon"), status: .ok,
-                    detail: tr("This Metal compiler is the one nxnative was tested with.", "Metal-kompilatoren er den nxnative er testet med.")))
+                report.items.append(CheckItem(id: "metalver", title: L("Tested Metal version"), status: .ok,
+                    detail: L("This Metal compiler is the one nxnative was tested with.")))
             } else {
                 report.metalMismatch = true
                 var tested = ""
@@ -184,10 +178,9 @@ final class SetupChecker {
                     tested = " (" + check.output[r].replacingOccurrences(of: "install ", with: "") + ")"
                 }
                 report.items.append(CheckItem(
-                    id: "metalver", title: tr("Tested Metal version", "Testet Metal-versjon"), status: .warn,
-                    detail: tr("Your Xcode is not the one nxnative was tested with\(tested). Games that use NVN then stop before their shaders unless you allow this Mac's compiler when you build (untested; graphics glitches are possible). The safe way is to install the tested Xcode beside yours.",
-                               "Xcode-versjonen din er ikke den nxnative er testet med\(tested). Spill som bruker NVN stopper da før shaderne, med mindre du tillater denne Macens kompilator når du bygger (ikke testet; grafikkfeil kan forekomme). Den trygge løsningen er å installere den testede Xcode-versjonen ved siden av."),
-                    fixes: [.link(tr("Xcode downloads", "Last ned Xcode"), "https://developer.apple.com/download/all/")],
+                    id: "metalver", title: L("Tested Metal version"), status: .warn,
+                    detail: L("Your Xcode is not the one nxnative was tested with%@. Games that use NVN then stop before their shaders unless you allow this Mac's compiler when you build (untested; graphics glitches are possible). The safe way is to install the tested Xcode beside yours.", "\(tested)"),
+                    fixes: [.link(L("Xcode downloads"), "https://developer.apple.com/download/all/")],
                     more: check.output.replacingOccurrences(of: "[RED] ", with: "")))
             }
         }
@@ -197,21 +190,19 @@ final class SetupChecker {
     }
 
     nonisolated private static func pythonItem(python: String, ownPython: Bool) -> CheckItem {
-        let title = tr("Python packages", "Python-pakker")
+        let title = L("Python packages")
         guard let outcome = PythonCheck.run(python) else {
             return CheckItem(id: "python", title: title, status: .fail,
-                detail: tr("No Python environment for the build script yet. NX Builder can set one up (a few minutes, about 100 MB).",
-                           "Det finnes ikke noe Python-miljø for byggeskriptet ennå. NX Builder kan sette opp et (noen minutter, ca. 100 MB)."),
+                detail: L("No Python environment for the build script yet. NX Builder can set one up (a few minutes, about 100 MB)."),
                 fixes: [.action(.setUpPython)] + (Shell.which("uv") == nil ? [.command("brew install uv")] : []))
         }
-        let place = ownPython ? tr("NX Builder's own environment", "NX Builders eget miljø") : python.deletingLastPathComponent.deletingLastPathComponent.tildePath
+        let place = ownPython ? L("NX Builder's own environment") : python.deletingLastPathComponent.deletingLastPathComponent.tildePath
         if outcome.ok {
             return CheckItem(id: "python", title: title, status: .ok,
                              detail: "Python \(outcome.version) · lz4, Capstone 5, fontTools · \(place)")
         }
         return CheckItem(id: "python", title: title, status: .fail,
-            detail: tr("The Python in \(place) is missing a package or has the wrong one. Set up NX Builder's own environment instead:",
-                       "Python i \(place) mangler en pakke eller har feil versjon. Sett opp NX Builders eget miljø i stedet:"),
+            detail: L("The Python in %@ is missing a package or has the wrong one. Set up NX Builder's own environment instead:", "\(place)"),
             fixes: [.action(.setUpPython)] + (Shell.which("uv") == nil ? [.command("brew install uv")] : []),
             more: outcome.error)
     }
@@ -221,9 +212,8 @@ final class SetupChecker {
             ? CheckItem(id: "keys", title: "prod.keys", status: .ok, detail: keys.tildePath)
             : CheckItem(id: "keys", title: "prod.keys", status: keys.isEmpty ? .warn : .fail,
                         detail: keys.isEmpty
-                            ? tr("Not chosen yet. NSP and XCI files need the prod.keys dumped from your own Switch.",
-                                 "Ikke valgt ennå. NSP- og XCI-filer trenger prod.keys dumpet fra din egen Switch.")
-                            : tr("\(keys.tildePath) is gone.", "Fant ikke \(keys.tildePath)."),
+                            ? L("Not chosen yet. NSP and XCI files need the prod.keys dumped from your own Switch.")
+                            : L("%@ is gone.", "\(keys.tildePath)"),
                         fixes: [.action(.chooseKeys)])
     }
 }

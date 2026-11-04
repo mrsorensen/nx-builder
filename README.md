@@ -6,7 +6,8 @@ NX Builder is a small, free macOS app on top of nxnative. You pick a game file, 
 double-clickable Mac app of the game. It sets up what nxnative needs, explains what goes wrong in plain words,
 and keeps your built games in a library.
 
-The app speaks English, and Norwegian on a Mac set to Norwegian ([norsk README](README.nb.md)).
+The app speaks English, Norwegian, German, French, Spanish, Brazilian Portuguese, Japanese and Simplified Chinese,
+following the Mac's language ([norsk README](README.nb.md)).
 
 > NX Builder contains no games, keys or copyrighted Nintendo material, and links to none. You need dumps of games
 > you own and the `prod.keys` from your own Switch. NX Builder is not affiliated with Nintendo, and it is a separate
@@ -38,6 +39,8 @@ The app speaks English, and Norwegian on a Mac set to Norwegian ([norsk README](
 - **Keeps nxnative up to date.** It shows when nxnative has new fixes, and updates it with one click.
 - **Handles loose files.** An XCI or NSP in Downloads can be moved into a folder of its own, as nxnative expects.
 - **Shows the controls.** A keyboard and controller overview, matching nxnative's key map.
+- **Speaks your language.** English, Norsk, Deutsch, Français, Español, Português (Brasil), 日本語 and 简体中文,
+  picked from the Mac's language or chosen in Setup.
 
 ## Requirements
 
@@ -126,13 +129,26 @@ The app is plain SwiftUI with no Xcode project: `Sources/` is compiled by `build
 
 ```bash
 ./build.sh             # build/NX Builder.app
-./test.sh              # headless checks against ~/nxnative: no window opens
+./test.sh              # headless checks against ~/nxnative, and of the translations: no window opens
 ./build.sh --release   # build/NX-Builder-<version>.zip
 ./snapshot.sh          # the pages as PNG files in build/snapshots, drawn without opening a window
 ```
 
 NX Builder follows nxnative's front-end contract ([docs/frontends.md](https://github.com/seedds/nxnative/blob/main/docs/frontends.md)):
 it reads the build script's `--progress json` events, and shows the `Front-ends:` notes after an nxnative update.
+
+## Translate
+
+Each language is one file, [`Localizations/<code>.json`](Localizations), that maps the English texts to their
+translation. To add or improve one:
+
+1. Copy `Localizations/nb.json` to `Localizations/<code>.json` (the keys are the English texts; keep them as they are).
+2. Translate the values. `%@` in a key is a value the app fills in; write it as `%1$@`, `%2$@`, … in the order the
+   key has them, so you can move them around.
+3. Add the language to `AppLanguage` in `Sources/L10n.swift`, then run `python3 Tools/check_localizations.py <code>`
+   until it says ok.
+
+Corrections from native speakers are very welcome: the translations other than Norwegian were made with AI help.
 
 ## Licence
 

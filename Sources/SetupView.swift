@@ -16,8 +16,7 @@ struct SetupView: View {
         Form {
             if checker.hasChecked && checker.failures > 0 {
                 Section {
-                    Label(tr("\(checker.failures) thing(s) to fix before you can build. Each has a button or a command to copy into Terminal.",
-                             "\(checker.failures) ting må fikses før du kan bygge. Hver har en knapp eller en kommando du kan kopiere inn i Terminal."),
+                    Label(L("%@ thing(s) to fix before you can build. Each has a button or a command to copy into Terminal.", "\(checker.failures)"),
                           systemImage: "wrench.and.screwdriver")
                         .foregroundStyle(.orange)
                 }
@@ -27,14 +26,14 @@ struct SetupView: View {
                 Section(tasks.title) { TaskPanel(tasks: tasks) }
             }
 
-            Section(tr("Folders and keys", "Mapper og nøkler")) {
-                PathRow(title: tr("nxnative folder", "nxnative-mappe"), path: settings.repoPath,
-                        placeholder: tr("Choose the nxnative folder", "Velg nxnative-mappen"),
+            Section(L("Folders and keys")) {
+                PathRow(title: L("nxnative folder"), path: settings.repoPath,
+                        placeholder: L("Choose the nxnative folder"),
                         missing: !settings.hasRepo) {
                     chooseRepo()
                 }
                 PathRow(title: "prod.keys", path: settings.keysPath,
-                        placeholder: tr("Choose the keys dumped from your Switch", "Velg nøkkelfilen fra din Switch"),
+                        placeholder: L("Choose the keys dumped from your Switch"),
                         missing: !FileManager.default.fileExists(atPath: settings.keysPath)) {
                     chooseKeys()
                 }
@@ -42,17 +41,17 @@ struct SetupView: View {
 
             Section {
                 if checker.items.isEmpty && checker.isChecking {
-                    HStack { ProgressView().controlSize(.small); Text(tr("Checking …", "Sjekker …")).foregroundStyle(.secondary) }
+                    HStack { ProgressView().controlSize(.small); Text(L("Checking …")).foregroundStyle(.secondary) }
                 }
                 ForEach(checker.items) { item in
                     CheckRow(item: item, busy: tasks.isRunning || model.runner.isBusy, perform: perform)
                 }
             } header: {
                 HStack {
-                    Text(tr("What building needs", "Det bygging trenger"))
+                    Text(L("What building needs"))
                     Spacer()
                     if checker.isChecking { ProgressView().controlSize(.small) }
-                    Button(tr("Check again", "Sjekk på nytt"), action: recheck)
+                    Button(L("Check again"), action: recheck)
                         .disabled(checker.isChecking)
                 }
             }
@@ -61,60 +60,56 @@ struct SetupView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(updateTitle(updates))
-                        Text(tr("nxnative gets fixes and new games almost daily. Build a game again after an update to get them.",
-                                "nxnative får rettelser og nye spill nesten daglig. Bygg et spill på nytt etter en oppdatering for å få dem."))
+                        Text(L("nxnative gets fixes and new games almost daily. Build a game again after an update to get them."))
                             .font(.caption).foregroundStyle(.secondary)
                         if !updates.localChanges.isEmpty {
-                            Text(tr("Changed here: \(updates.localChanges.joined(separator: ", ")). If an update stops on them, NX Builder's own Python environment does not need the guide's change to pyproject.toml.",
-                                    "Endret her: \(updates.localChanges.joined(separator: ", ")). Stopper en oppdatering på dem, trenger ikke NX Builders eget Python-miljø guidens endring i pyproject.toml."))
+                            Text(L("Changed here: %@. If an update stops on them, NX Builder's own Python environment does not need the guide's change to pyproject.toml.", "\(updates.localChanges.joined(separator: ", "))"))
                                 .font(.caption).foregroundStyle(.orange)
                         }
                     }
                     Spacer()
                     if updates.checking { ProgressView().controlSize(.small) }
-                    Button(tr("Check", "Sjekk")) { Task { await updates.check(repo: settings.repoPath) } }
+                    Button(L("Check")) { Task { await updates.check(repo: settings.repoPath) } }
                         .disabled(updates.checking || !settings.hasRepo)
-                    Button(tr("Update", "Oppdater"), action: update)
+                    Button(L("Update now"), action: update)
                         .disabled(tasks.isRunning || model.runner.isBusy || !settings.hasRepo)
                 }
                 if !updates.frontEndNotes.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(tr("Notes for front ends in this update (NX Builder may need an update if one says “break”):",
-                                "Merknader til front ends i denne oppdateringen (NX Builder kan trenge en oppdatering hvis en sier «break»):"))
+                        Text(L("Notes for front ends in this update (NX Builder may need an update if one says “break”):"))
                             .font(.caption)
                         ForEach(updates.frontEndNotes, id: \.self) { Text($0).font(.system(size: 11, design: .monospaced)).textSelection(.enabled) }
                     }
                 }
                 Button { showRecipes = true } label: {
-                    Label(tr("Games with a recipe, and the version each needs", "Spill med oppskrift, og versjonen hvert trenger"), systemImage: "list.bullet.rectangle")
+                    Label(L("Games with a recipe, and the version each needs"), systemImage: "list.bullet.rectangle")
                 }
                 .buttonStyle(.link)
                 Button { showControls = true } label: {
-                    Label(tr("Keyboard and controllers", "Tastatur og kontroller"), systemImage: "keyboard")
+                    Label(L("Keyboard and controllers"), systemImage: "keyboard")
                 }
                 .buttonStyle(.link)
             }
 
             Section("NX Builder") {
-                SwiftUI.Picker(tr("Language", "Språk"), selection: $settings.appLanguage) {
+                SwiftUI.Picker(L("Language"), selection: $settings.appLanguage) {
                     ForEach(AppLanguage.allCases) { Text($0.label).tag($0) }
                 }
-                if settings.appLanguage != .system && (settings.appLanguage == .norwegian) != L10n.norwegian {
-                    Text(tr("Applies the next time NX Builder starts.", "Gjelder neste gang NX Builder starter."))
+                if settings.appLanguage != .system && settings.appLanguage != L10n.language {
+                    Text(L("Applies the next time NX Builder starts."))
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Toggle(tr("Notify me when a build finishes", "Varsle meg når et bygg er ferdig"), isOn: $settings.notify)
-                Text(tr("NX Builder only runs nxnative's own build script. It contains no game files or keys: use dumps of games you own and the keys from your own Switch.",
-                        "NX Builder kjører bare nxnatives eget byggeskript. Den inneholder ingen spillfiler eller nøkler: bruk dumper av spill du eier og nøklene fra din egen Switch."))
+                Toggle(L("Notify me when a build finishes"), isOn: $settings.notify)
+                Text(L("NX Builder only runs nxnative's own build script. It contains no game files or keys: use dumps of games you own and the keys from your own Switch."))
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
-        .navigationTitle(tr("Setup", "Oppsett"))
+        .navigationTitle(L("Setup"))
         .sheet(isPresented: $showControls) { ControlsSheet() }
         .sheet(isPresented: $showRecipes) { RecipeListView() }
         .task { if model.updates.behind == nil { await model.updates.check(repo: model.settings.repoPath) } }
-        .alert(tr("Setup", "Oppsett"), isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
+        .alert(L("Setup"), isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
             Button("OK") {}
         } message: {
             Text(problem ?? "")
@@ -122,11 +117,11 @@ struct SetupView: View {
     }
 
     private func updateTitle(_ updates: NxnativeUpdates) -> String {
-        let current = updates.current.isEmpty ? "" : tr("Version \(updates.current)", "Versjon \(updates.current)")
+        let current = updates.current.isEmpty ? "" : L("Version %@", "\(updates.current)")
         switch updates.behind {
-        case nil: return current.isEmpty ? tr("Updates", "Oppdateringer") : current
-        case 0?: return current + tr(" · up to date", " · oppdatert")
-        case let n?: return current + tr(" · \(n) new change(s) available", " · \(n) nye endringer tilgjengelig")
+        case nil: return current.isEmpty ? L("Updates") : current
+        case 0?: return current + L(" · up to date")
+        case let n?: return current + L(" · %@ new change(s) available", "\(n)")
         }
     }
 
@@ -152,17 +147,17 @@ struct SetupView: View {
         case .setUpPython:
             switch SetupSteps.python() {
             case .success(let steps):
-                model.tasks.run(tr("Setting up Python", "Setter opp Python"), steps: steps, then: afterTask)
+                model.tasks.run(L("Setting up Python"), steps: steps, then: afterTask)
             case .failure(let error):
-                model.tasks.fail(tr("Setting up Python", "Setter opp Python"), error.message)
+                model.tasks.fail(L("Setting up Python"), error.message)
             }
         case .installMetal:
-            model.tasks.run(tr("Installing the Metal toolchain", "Installerer Metal-verktøyene"), steps: SetupSteps.metalToolchain(), then: afterTask)
+            model.tasks.run(L("Installing the Metal toolchain"), steps: SetupSteps.metalToolchain(), then: afterTask)
         }
     }
 
     private func chooseRepo() {
-        if let path = FilePicker.folder(message: tr("Choose the folder you cloned nxnative into.", "Velg mappen der nxnative ligger."), startingAt: model.settings.repoPath) {
+        if let path = FilePicker.folder(message: L("Choose the folder you cloned nxnative into."), startingAt: model.settings.repoPath) {
             model.settings.repoPath = path
             recheck()
             Task { await model.updates.check(repo: path) }
@@ -170,15 +165,14 @@ struct SetupView: View {
     }
 
     private func chooseKeys() {
-        if let path = FilePicker.file(message: tr("Choose the prod.keys dumped from your own Switch.", "Velg prod.keys fra din egen Switch."), startingAt: model.settings.keysPath) {
+        if let path = FilePicker.file(message: L("Choose the prod.keys dumped from your own Switch."), startingAt: model.settings.keysPath) {
             model.settings.keysPath = path
             recheck()
         }
     }
 
     private func clone() {
-        guard let parent = FilePicker.folder(message: tr("Where should nxnative go? A folder “nxnative” is made inside the one you choose (under 1 GB).",
-                                                         "Hvor skal nxnative ligge? En mappe «nxnative» lages inni den du velger (under 1 GB)."),
+        guard let parent = FilePicker.folder(message: L("Where should nxnative go? A folder “nxnative” is made inside the one you choose (under 1 GB)."),
                                              startingAt: NSHomeDirectory()) else { return }
         let dest = parent + "/nxnative"
         if FileManager.default.fileExists(atPath: dest) {
@@ -186,12 +180,11 @@ struct SetupView: View {
                 model.settings.repoPath = dest
                 recheck()
             } else {
-                problem = tr("\(dest.tildePath) already exists. Choose another place, or remove that folder first.",
-                             "\(dest.tildePath) finnes allerede. Velg et annet sted, eller fjern den mappen først.")
+                problem = L("%@ already exists. Choose another place, or remove that folder first.", "\(dest.tildePath)")
             }
             return
         }
-        model.tasks.run(tr("Downloading nxnative", "Laster ned nxnative"), steps: SetupSteps.clone(into: dest)) { ok in
+        model.tasks.run(L("Downloading nxnative"), steps: SetupSteps.clone(into: dest)) { ok in
             if ok { model.settings.repoPath = dest }
             afterTask(ok)
         }
@@ -201,7 +194,7 @@ struct SetupView: View {
         let repo = model.settings.repoPath
         Task {
             let old = await Task.detached { NxnativeUpdates.head(repo: repo) }.value
-            model.tasks.run(tr("Updating nxnative", "Oppdaterer nxnative"), steps: SetupSteps.update(repo: repo)) { ok in
+            model.tasks.run(L("Updating nxnative"), steps: SetupSteps.update(repo: repo)) { ok in
                 if ok { Task { await model.updates.readNotes(repo: repo, since: old) } }
                 afterTask(ok)
             }
@@ -221,7 +214,7 @@ struct TaskPanel: View {
                     ProgressView().controlSize(.small)
                     Text(tasks.step)
                 case .done:
-                    Label(tr("Done", "Ferdig"), systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                    Label(L("Done"), systemImage: "checkmark.circle.fill").foregroundStyle(.green)
                 case .failed(let reason):
                     Label(reason, systemImage: "xmark.octagon.fill").foregroundStyle(.red)
                 case .idle:
@@ -229,9 +222,9 @@ struct TaskPanel: View {
                 }
                 Spacer()
                 if tasks.isRunning {
-                    Button(tr("Stop", "Stopp")) { tasks.cancel() }
+                    Button(L("Stop")) { tasks.cancel() }
                 } else {
-                    Button(tr("Close", "Lukk")) { tasks.dismiss() }
+                    Button(L("Close")) { tasks.dismiss() }
                 }
             }
             if !tasks.lines.isEmpty { LogView(lines: tasks.lines, height: 120...220) }
@@ -257,7 +250,7 @@ struct CheckRow: View {
                 }
                 Spacer()
                 if !item.more.isEmpty {
-                    Button(expanded ? tr("Hide details", "Skjul detaljer") : tr("Details", "Detaljer")) { expanded.toggle() }
+                    Button(expanded ? L("Hide details") : L("Details")) { expanded.toggle() }
                         .buttonStyle(.link).font(.caption)
                 }
             }
@@ -286,7 +279,7 @@ struct CheckRow: View {
                     .textSelection(.enabled)
                     .padding(.horizontal, 8).padding(.vertical, 4)
                     .background(RoundedRectangle(cornerRadius: 5).fill(Color(nsColor: .textBackgroundColor)))
-                Button(copied == command ? tr("Copied", "Kopiert") : tr("Copy", "Kopier")) {
+                Button(copied == command ? L("Copied") : L("Copy")) {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(command, forType: .string)
                     copied = command
@@ -306,11 +299,11 @@ struct CheckRow: View {
 
     private func label(_ action: SetupAction) -> String {
         switch action {
-        case .cloneNxnative: tr("Download nxnative …", "Last ned nxnative …")
-        case .chooseRepo: tr("Choose its folder …", "Velg mappen …")
-        case .setUpPython: tr("Set up Python", "Sett opp Python")
-        case .installMetal: tr("Install the Metal toolchain", "Installer Metal-verktøyene")
-        case .chooseKeys: tr("Choose prod.keys …", "Velg prod.keys …")
+        case .cloneNxnative: L("Download nxnative …")
+        case .chooseRepo: L("Choose its folder …")
+        case .setUpPython: L("Set up Python")
+        case .installMetal: L("Install the Metal toolchain")
+        case .chooseKeys: L("Choose prod.keys …")
         }
     }
 

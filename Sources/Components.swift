@@ -15,14 +15,14 @@ struct PathRow: View {
             HStack(spacing: 8) {
                 if missing && !path.isEmpty {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                        .help(tr("No longer there", "Finnes ikke lenger"))
+                        .help(L("No longer there"))
                 }
                 Text(path.isEmpty ? placeholder : path.tildePath)
                     .foregroundStyle(path.isEmpty ? .secondary : .primary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(path)
-                Button(tr("Choose…", "Velg…"), action: choose)
+                Button(L("Choose…"), action: choose)
             }
         }
     }
@@ -34,7 +34,7 @@ enum FilePicker {
     static func folder(message: String, startingAt start: String) -> String? {
         let panel = NSOpenPanel()
         panel.message = message
-        panel.prompt = tr("Choose", "Velg")
+        panel.prompt = L("Choose")
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.canCreateDirectories = true
@@ -45,7 +45,7 @@ enum FilePicker {
     static func file(message: String, startingAt start: String) -> String? {
         let panel = NSOpenPanel()
         panel.message = message
-        panel.prompt = tr("Choose", "Velg")
+        panel.prompt = L("Choose")
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.directoryURL = startURL(start)
@@ -55,8 +55,8 @@ enum FilePicker {
     /// A game file (XCI, NSP, NSZ, XCZ or NUP), or the folder holding a game's files.
     static func game(startingAt start: String) -> String? {
         let panel = NSOpenPanel()
-        panel.message = tr("Choose the game file (XCI or NSP), or the folder with the base game, update and any DLC.", "Velg spillfilen (XCI eller NSP), eller mappen med grunnspill, oppdatering og eventuell DLC.")
-        panel.prompt = tr("Choose", "Velg")
+        panel.message = L("Choose the game file (XCI or NSP), or the folder with the base game, update and any DLC.")
+        panel.prompt = L("Choose")
         panel.canChooseDirectories = true
         panel.canChooseFiles = true
         panel.allowedContentTypes = GameFile.extensions.sorted().flatMap { ext in

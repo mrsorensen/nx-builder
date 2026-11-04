@@ -99,11 +99,11 @@ struct GameFile: Identifiable, Sendable {
     var label: String {
         let kind: String
         switch role {
-        case .base: kind = tr("Base game", "Grunnspill")
-        case .update: kind = tr("Update", "Oppdatering")
+        case .base: kind = L("Base game")
+        case .update: kind = L("Update")
         case .dlc: kind = "DLC"
         case .nup: kind = "NUP"
-        case .dump: kind = tr("Extracted game", "Utpakket spill")
+        case .dump: kind = L("Extracted game")
         case .unknown: kind = ""
         }
         guard let version, version != "v0", role != .dlc else { return kind }

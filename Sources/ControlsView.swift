@@ -12,11 +12,11 @@ struct KeyBinding: Identifiable {
 
 enum KeyMap {
     static let moving: [KeyBinding] = [
-        .init(keys: ["W", "A", "S", "D"], button: tr("Left stick", "Venstre stikke"), note: tr("Walk and run", "Gå og løp")),
-        .init(keys: ["⇧", "← ↑ → ↓"], button: tr("Right stick", "Høyre stikke"), note: tr("Camera: hold Shift and press an arrow key", "Kamera: hold Shift og trykk en piltast")),
-        .init(keys: ["← ↑ → ↓"], button: "D-pad", note: tr("The arrow keys alone", "Piltastene alene")),
-        .init(keys: ["F"], button: tr("Press the left stick", "Trykk venstre stikke"), note: ""),
-        .init(keys: ["G"], button: tr("Press the right stick", "Trykk høyre stikke"), note: ""),
+        .init(keys: ["W", "A", "S", "D"], button: L("Left stick"), note: L("Walk and run")),
+        .init(keys: ["⇧", "← ↑ → ↓"], button: L("Right stick"), note: L("Camera: hold Shift and press an arrow key")),
+        .init(keys: ["← ↑ → ↓"], button: "D-pad", note: L("The arrow keys alone")),
+        .init(keys: ["F"], button: L("Press the left stick"), note: ""),
+        .init(keys: ["G"], button: L("Press the right stick"), note: ""),
     ]
     static let buttons: [KeyBinding] = [
         .init(keys: ["J"], button: "A", note: ""),
@@ -29,12 +29,12 @@ enum KeyMap {
         .init(keys: ["C"], button: "ZR", note: ""),
         .init(keys: ["⏎"], button: "+", note: "Return"),
         .init(keys: ["⇥"], button: "−", note: "Tab"),
-        .init(keys: [tr("Space", "Mellomrom")], button: tr("Shake the controller", "Rist kontrolleren"), note: tr("While you hold it", "Mens du holder den inne")),
+        .init(keys: [L("Space")], button: L("Shake the controller"), note: L("While you hold it")),
     ]
     static let window: [KeyBinding] = [
-        .init(keys: [tr("Mouse", "Mus")], button: tr("Touch screen", "Berøringsskjerm"), note: tr("Left mouse button", "Venstre museknapp")),
-        .init(keys: ["⌃", "⌘", "F"], button: tr("Full screen on/off", "Fullskjerm av/på"), note: ""),
-        .init(keys: ["⌘", "Q"], button: tr("Quit the game", "Avslutt spillet"), note: tr("What the game has not saved is lost", "Det spillet ikke har lagret, går tapt")),
+        .init(keys: [L("Mouse")], button: L("Touch screen"), note: L("Left mouse button")),
+        .init(keys: ["⌃", "⌘", "F"], button: L("Full screen on/off"), note: ""),
+        .init(keys: ["⌘", "Q"], button: L("Quit the game"), note: L("What the game has not saved is lost")),
     ]
 }
 
@@ -54,21 +54,19 @@ struct KeyCap: View {
 struct ControlsContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(tr("The keyboard works without any setup while the game window is active (click it first). The keys go by their place on the keyboard and cannot be changed in nxnative.",
-                    "Tastaturet virker uten oppsett når spillvinduet er aktivt (klikk i det først). Tastene følger plassen på tastaturet og kan ikke endres i nxnative."))
+            Text(L("The keyboard works without any setup while the game window is active (click it first). The keys go by their place on the keyboard and cannot be changed in nxnative."))
                 .font(.callout).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(alignment: .top, spacing: 28) {
                 VStack(alignment: .leading, spacing: 18) {
-                    group(tr("Moving and camera", "Bevegelse og kamera"), KeyMap.moving)
-                    group(tr("Window", "Vindu"), KeyMap.window)
+                    group(L("Moving and camera"), KeyMap.moving)
+                    group(L("Window"), KeyMap.window)
                 }
-                group(tr("Buttons", "Knapper"), KeyMap.buttons)
+                group(L("Buttons"), KeyMap.buttons)
             }
             VStack(alignment: .leading, spacing: 6) {
-                Text(tr("Controllers", "Kontroller")).font(.headline)
-                Text(tr("Xbox, PlayStation, Switch Pro and 8BitDo controllers work as soon as they are connected to the Mac (Bluetooth or cable), also while the game runs. The buttons go by position: right is A, bottom B, top X and left Y. On a Nintendo controller they follow the labels. The first controller is player 1 together with the keyboard; more controllers become more players. Hold the Home button for 2 seconds and press A to quit.",
-                        "Xbox-, PlayStation-, Switch Pro- og 8BitDo-kontrollere virker med en gang de er koblet til Macen (Bluetooth eller kabel), også mens spillet kjører. Knappene følger plassering: høyre er A, nederst B, øverst X og venstre Y. På en Nintendo-kontroller følger de det som står på knappene. Den første kontrolleren er spiller 1 sammen med tastaturet; flere kontrollere blir flere spillere. Hold Home-knappen i 2 sekunder og trykk A for å avslutte."))
+                Text(L("Controllers")).font(.headline)
+                Text(L("Xbox, PlayStation, Switch Pro and 8BitDo controllers work as soon as they are connected to the Mac (Bluetooth or cable), also while the game runs. The buttons go by position: right is A, bottom B, top X and left Y. On a Nintendo controller they follow the labels. The first controller is player 1 together with the keyboard; more controllers become more players. Hold the Home button for 2 seconds and press A to quit."))
                     .font(.callout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -109,7 +107,7 @@ struct ControlsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(tr("Keyboard and controllers", "Tastatur og kontroller")).font(.title2.weight(.semibold))
+            Text(L("Keyboard and controllers")).font(.title2.weight(.semibold))
                 .padding([.top, .horizontal], 20)
             ScrollView {
                 ControlsContent().padding(20)
@@ -117,7 +115,7 @@ struct ControlsSheet: View {
             Divider()
             HStack {
                 Spacer()
-                Button(tr("Close", "Lukk")) { dismiss() }.keyboardShortcut(.defaultAction)
+                Button(L("Close")) { dismiss() }.keyboardShortcut(.defaultAction)
             }
             .padding(12)
         }

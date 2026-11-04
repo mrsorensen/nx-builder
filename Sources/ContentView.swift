@@ -13,20 +13,20 @@ struct ContentView: View {
             List(selection: $selection) {
                 Label {
                     HStack {
-                        Text(tr("Build a game", "Bygg et spill"))
+                        Text(L("Build a game"))
                         Spacer()
                         if model.runner.isBusy { ProgressView().controlSize(.small) }
                     }
                 } icon: { Image(systemName: "hammer") }
                 .tag(SidebarItem.build)
 
-                Label(tr("My games", "Mine spill"), systemImage: "gamecontroller")
+                Label(L("My games"), systemImage: "gamecontroller")
                     .badge(model.library.apps.count)
                     .tag(SidebarItem.library)
 
                 Label {
                     HStack {
-                        Text(tr("Setup", "Oppsett"))
+                        Text(L("Setup"))
                         Spacer()
                         if model.tasks.isRunning {
                             ProgressView().controlSize(.small)
@@ -34,7 +34,7 @@ struct ContentView: View {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                         } else if let behind = model.updates.behind, behind > 0 {
                             Image(systemName: "arrow.down.circle.fill").foregroundStyle(.blue)
-                                .help(tr("nxnative has updates", "nxnative har oppdateringer"))
+                                .help(L("nxnative has updates"))
                         }
                     }
                 } icon: { Image(systemName: "checklist") }

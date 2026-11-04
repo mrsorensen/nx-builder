@@ -111,12 +111,11 @@ final class BuildRunner {
             exitCont.finish()
         }
 
-        append(.info, tr("Building \(settings.gamePath.lastPathComponent) …", "Bygger \(settings.gamePath.lastPathComponent) …"))
+        append(.info, L("Building %@ …", "\(settings.gamePath.lastPathComponent)"))
         do {
             try p.run()
         } catch {
-            state = .failed(tr("Could not start the build script: \(error.localizedDescription)",
-                               "Kunne ikke starte byggeskriptet: \(error.localizedDescription)"))
+            state = .failed(L("Could not start the build script: %@", "\(error.localizedDescription)"))
             return
         }
         process = p
@@ -141,7 +140,7 @@ final class BuildRunner {
     func cancel() {
         guard let p = process, p.isRunning else { return }
         cancelRequested = true
-        append(.warn, tr("Stopping … (what is done is reused next time)", "Avbryter … (det som er ferdig, gjenbrukes neste gang)"))
+        append(.warn, L("Stopping … (what is done is reused next time)"))
         let group = p.processIdentifier
         killpg(group, SIGINT)
         Task {
@@ -257,8 +256,8 @@ final class BuildRunner {
         if let done = (obj["done"] as? NSNumber)?.int64Value {
             let unit = obj["unit"] as? String ?? ""
             let total = (obj["total"] as? NSNumber)?.int64Value
-            let about = (obj["est"] as? Bool ?? false) ? tr("about ", "ca. ") : ""
-            let of = tr(" of ", " av ")
+            let about = (obj["est"] as? Bool ?? false) ? L("about ") : ""
+            let of = L(" of ")
             if unit == "B" {
                 parts.append(formatBytes(done) + (total.map { of + about + formatBytes($0) } ?? ""))
             } else {
@@ -287,38 +286,36 @@ final class BuildRunner {
 
         if status == 0 && !cancelRequested {
             guard let built = reportedApp ?? findBuiltApp() else {
-                state = .failed(tr("The build finished, but the app was not found. See the log.",
-                                   "Bygget ble ferdig, men appen ble ikke funnet. Se loggen."))
+                state = .failed(L("The build finished, but the app was not found. See the log."))
                 notify(success: false)
                 return
             }
             var final = built
             if let dest = destination, !Self.sameFolder(built.deletingLastPathComponent, dest) {
                 state = .moving(dest)
-                append(.info, tr("Moving the app to \(dest.tildePath) …", "Flytter appen til \(dest.tildePath) …"))
+                append(.info, L("Moving the app to %@ …", "\(dest.tildePath)"))
                 let result = await Task.detached { Result { try Self.moveApp(built, toFolder: dest) } }.value
                 switch result {
                 case .success(let moved):
                     final = moved.path
                     if let old = moved.trashed {
-                        append(.info, tr("The earlier build, \(old.tildePath), went to the Trash.", "Det forrige bygget, \(old.tildePath), ble lagt i papirkurven."))
+                        append(.info, L("The earlier build, %@, went to the Trash.", "\(old.tildePath)"))
                     }
                 case .failure(let error):
-                    append(.warn, tr("Could not move the app (\(error.localizedDescription)). It is in \(built.deletingLastPathComponent.tildePath).",
-                                     "Kunne ikke flytte appen (\(error.localizedDescription)). Den ligger i \(built.deletingLastPathComponent.tildePath)."))
+                    append(.warn, L("Could not move the app (%@). It is in %@.", "\(error.localizedDescription)", "\(built.deletingLastPathComponent.tildePath)"))
                 }
             }
-            append(.ok, tr("Done: \(final.tildePath)", "Ferdig: \(final.tildePath)"))
+            append(.ok, L("Done: %@", "\(final.tildePath)"))
             state = .succeeded(final)
             onFinish?(final)
             notify(success: true, app: final)
         } else if cancelRequested || status == 130 {
             state = .cancelled
-            append(.warn, tr("The build was stopped.", "Bygget ble avbrutt."))
+            append(.warn, L("The build was stopped."))
         } else {
             let reason = lastRed
                 ?? stderrTail.last(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty })
-                ?? tr("The build script stopped with exit code \(status).", "Byggeskriptet stoppet med kode \(status).")
+                ?? L("The build script stopped with exit code %@.", "\(status)")
             state = .failed(reason)
             notify(success: false)
         }
@@ -351,8 +348,7 @@ final class BuildRunner {
     struct OccupiedError: LocalizedError {
         let path: String
         var errorDescription: String? {
-            tr("\(path.tildePath) is another app, not an earlier build of this game, so it was left alone",
-               "\(path.tildePath) er en annen app, ikke et tidligere bygg av dette spillet, så den ble ikke rørt")
+            L("%@ is another app, not an earlier build of this game, so it was left alone", "\(path.tildePath)")
         }
     }
 
@@ -385,12 +381,11 @@ final class BuildRunner {
         let content = UNMutableNotificationContent()
         if success {
             let name = ((app ?? "").lastPathComponent as NSString).deletingPathExtension
-            content.title = tr("\(name) is ready", "\(name) er klar")
-            content.body = tr("The game was built. The first start takes a few minutes while macOS checks the app.",
-                              "Spillet er bygget. Første start tar noen minutter mens macOS sjekker appen.")
+            content.title = L("%@ is ready", "\(name)")
+            content.body = L("The game was built. The first start takes a few minutes while macOS checks the app.")
         } else {
-            content.title = tr("The build stopped", "Bygget stoppet")
-            content.body = lastRed ?? tr("See NX Builder for why.", "Se NX Builder for hvorfor.")
+            content.title = L("The build stopped")
+            content.body = lastRed ?? L("See NX Builder for why.")
         }
         content.sound = nil
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
