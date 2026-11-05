@@ -4,10 +4,7 @@
 
 NX Builder is a small, free macOS app on top of nxnative. You pick a game file, press **Build**, and get a
 double-clickable Mac app of the game. It sets up what nxnative needs, explains what goes wrong in plain words,
-and keeps your built games in a library.
-
-The app speaks English, Norwegian, German, French, Spanish, Brazilian Portuguese, Japanese and Simplified Chinese,
-following the Mac's language ([norsk README](README.nb.md)).
+and keeps your built games in a library. It speaks eight languages and follows your Mac's.
 
 > NX Builder contains no games, keys or copyrighted Nintendo material, and links to none. You need dumps of games
 > you own and the `prod.keys` from your own Switch. NX Builder is not affiliated with Nintendo, and it is a separate
@@ -139,13 +136,14 @@ it reads the build script's `--progress json` events, and shows the `Front-ends:
 Each language is one file, [`Localizations/<code>.json`](Localizations), that maps the English texts to their
 translation. To add or improve one:
 
-1. Copy `Localizations/nb.json` to `Localizations/<code>.json` (the keys are the English texts; keep them as they are).
+1. Copy any file in `Localizations/` to `Localizations/<code>.json` (the keys are the English texts; keep them as they
+   are).
 2. Translate the values. `%@` in a key is a value the app fills in; write it as `%1$@`, `%2$@`, … in the order the
    key has them, so you can move them around.
 3. Add the language to `AppLanguage` in `Sources/L10n.swift`, then run `python3 Tools/check_localizations.py <code>`
    until it says ok.
 
-Corrections from native speakers are very welcome: the translations other than Norwegian were made with AI help.
+Corrections from native speakers are very welcome: the translations were made with AI help.
 
 ## Licence
 
